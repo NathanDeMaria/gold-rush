@@ -1,0 +1,38 @@
+{
+ "markets": [
+  {
+   "close_time": "2026-09-25T03:17:29Z",
+   "custom_strike": {
+    "football_team": "08c52d1f-7ce1-445f-be72-97de0554ecc8"
+   },
+   "event_ticker": "KXNFLGAME-26SEP24ATLGB",
+   "expected_expiration_time": "2026-09-25T06:15:00Z",
+   "no_sub_title": "Green Bay",
+   "occurrence_datetime": "2026-09-25T03:15:00Z",
+   "open_time": "2026-09-15T16:15:00Z",
+   "result": "no",
+   "status": "finalized",
+   "ticker": "KXNFLGAME-26SEP24ATLGB-GB",
+   "title": "Green Bay wins",
+   "volume_fp": "26115940.49",
+   "yes_sub_title": "Green Bay"
+  },
+  {
+   "close_time": "2026-09-25T03:17:29Z",
+   "custom_strike": {
+    "football_team": "75685be6-4388-4bba-8bcb-d0b0c24feb50"
+   },
+   "event_ticker": "KXNFLGAME-26SEP24ATLGB",
+   "expected_expiration_time": "2026-09-25T06:15:00Z",
+   "no_sub_title": "Atlanta",
+   "occurrence_datetime": "2026-09-25T03:15:00Z",
+   "open_time": "2026-09-15T16:15:00Z",
+   "result": "yes",
+   "status": "finalized",
+   "ticker": "KXNFLGAME-26SEP24ATLGB-ATL",
+   "title": "Atlanta wins",
+   "volume_fp": "25143534.93",
+   "yes_sub_title": "Atlanta"
+  }
+ ]
+}

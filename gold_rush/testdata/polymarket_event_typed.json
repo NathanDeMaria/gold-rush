@@ -1,0 +1,79 @@
+{
+ "id": "848221",
+ "slug": "nfl-atl-gb-2026-09-25",
+ "title": "Falcons vs. Packers",
+ "endDate": "2026-09-25T00:15:00Z",
+ "closed": true,
+ "eventDate": "2026-09-24",
+ "startTime": "2026-09-25T00:15:00Z",
+ "seriesSlug": "nfl-2026",
+ "gameId": 19487,
+ "teams": [
+  {
+   "id": 100039,
+   "name": "Atlanta Falcons",
+   "abbreviation": "atl",
+   "alias": "Falcons",
+   "ordering": "away",
+   "league": "nfl"
+  },
+  {
+   "id": 100021,
+   "name": "Green Bay Packers",
+   "abbreviation": "gb",
+   "alias": "Packers",
+   "ordering": "home",
+   "league": "nfl"
+  }
+ ],
+ "markets": [
+  {
+   "id": "3580763",
+   "question": "Falcons vs. Packers",
+   "slug": "nfl-atl-gb-2026-09-25",
+   "endDate": "2026-09-25T00:15:00Z",
+   "startDate": "2026-08-14T12:00:26Z",
+   "outcomes": "[\"Falcons\", \"Packers\"]",
+   "outcomePrices": "[\"1\", \"0\"]",
+   "closed": true,
+   "closedTime": "2026-09-25 03:35:10.398008+00",
+   "volumeNum": 5346821.801232002,
+   "gameStartTime": "2026-09-25 00:15:00+00",
+   "clobTokenIds": "[\"14210704817622273694337463543394151487165262472482884963494075149888333468129\", \"114415763702250973760299499587430450894909671709658162852834453684441658587440\"]",
+   "acceptingOrdersTimestamp": "2026-08-14T12:00:26Z",
+   "sportsMarketType": "moneyline"
+  },
+  {
+   "id": "3701433",
+   "question": "Spread: Packers (-3.5)",
+   "slug": "nfl-atl-gb-2026-09-25-spread-home-3pt5",
+   "endDate": "2026-09-25T00:15:00Z",
+   "startDate": "2026-08-18T16:01:02Z",
+   "outcomes": "[\"Packers\", \"Falcons\"]",
+   "outcomePrices": "[\"0\", \"1\"]",
+   "closed": true,
+   "closedTime": "2026-09-25 05:20:51+00",
+   "volumeNum": 217084.34472099994,
+   "gameStartTime": "2026-09-25 00:15:00+00",
+   "clobTokenIds": "[\"77438308504917123646828656121703027815507342539920452872100781647037118028606\", \"25592513328108083950648824561016243564903611245457342516282186103904221924920\"]",
+   "acceptingOrdersTimestamp": "2026-08-18T16:01:02Z",
+   "sportsMarketType": "spreads"
+  },
+  {
+   "id": "3701434",
+   "question": "Spread: Packers (-4.5)",
+   "slug": "nfl-atl-gb-2026-09-25-spread-home-4pt5",
+   "endDate": "2026-09-25T00:15:00Z",
+   "startDate": "2026-08-18T16:01:01Z",
+   "outcomes": "[\"Packers\", \"Falcons\"]",
+   "outcomePrices": "[\"0\", \"1\"]",
+   "closed": true,
+   "closedTime": "2026-09-25 05:20:48+00",
+   "volumeNum": 2805390.82419,
+   "gameStartTime": "2026-09-25 00:15:00+00",
+   "clobTokenIds": "[\"102491313499250806487042381987424181997405491957886894227608387393647932436531\", \"36858745762367893193051408446707592104802914723683840035208921570474502694274\"]",
+   "acceptingOrdersTimestamp": "2026-08-18T16:01:01Z",
+   "sportsMarketType": "spreads"
+  }
+ ]
+}

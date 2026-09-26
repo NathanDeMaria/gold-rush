@@ -1,0 +1,57 @@
+{
+ "id": "38137",
+ "slug": "cfb-frsno-ku-2025-08-23",
+ "title": "Fresno State vs. Kansas",
+ "endDate": "2025-08-23T22:30:00Z",
+ "closed": true,
+ "eventDate": "2025-08-23",
+ "startTime": "2025-08-23T22:30:00Z",
+ "seriesSlug": "cfb-2025",
+ "markets": [
+  {
+   "id": "577611",
+   "question": "Fresno State vs. Kansas",
+   "slug": "cfb-frsno-ku-2025-08-23",
+   "endDate": "2025-08-30T22:30:00Z",
+   "startDate": "2025-08-18T04:01:06.137Z",
+   "outcomes": "[\"Fresno State\", \"Kansas\"]",
+   "outcomePrices": "[\"0\", \"1\"]",
+   "closed": true,
+   "closedTime": "2025-08-24 03:43:49+00",
+   "volumeNum": 35967.327822,
+   "gameStartTime": "2025-08-23 22:30:00+00",
+   "clobTokenIds": "[\"106880889312086660476072181720121584237931782813846922664181502604246322644541\", \"91043384601674228863233127811491439244701333458567932075677739011256488873032\"]",
+   "acceptingOrdersTimestamp": "2025-08-18T04:00:44Z"
+  },
+  {
+   "id": "579349",
+   "question": "Spread: Kansas (-13.5)",
+   "slug": "cfb-frsno-ku-2025-08-23-spread-home-13pt5",
+   "endDate": "2025-08-23T22:30:00Z",
+   "startDate": "2025-08-21T19:13:57.004Z",
+   "outcomes": "[\"Yes\", \"No\"]",
+   "outcomePrices": "[\"1\", \"0\"]",
+   "closed": true,
+   "closedTime": "2025-08-24 03:43:49+00",
+   "volumeNum": 2898.977834,
+   "gameStartTime": "2025-08-23 22:30:00+00",
+   "clobTokenIds": "[\"3839968276657437705530170912457891361326269764178270918586276693054410817719\", \"34020532077168131428540381162009366689672564811129444294380843400560049159675\"]",
+   "acceptingOrdersTimestamp": "2025-08-21T19:13:35Z"
+  },
+  {
+   "id": "579350",
+   "question": "Fresno State vs. Kansas: O/U 49.5",
+   "slug": "cfb-frsno-ku-2025-08-23-total-49pt5",
+   "endDate": "2025-08-23T22:30:00Z",
+   "startDate": "2025-08-21T19:13:47.01Z",
+   "outcomes": "[\"Over\", \"Under\"]",
+   "outcomePrices": "[\"0\", \"1\"]",
+   "closed": true,
+   "closedTime": "2025-08-24 03:42:53+00",
+   "volumeNum": 15093.17566,
+   "gameStartTime": "2025-08-23 22:30:00+00",
+   "clobTokenIds": "[\"88181112683231557938952284819749890970207836728949763580054842511046476060561\", \"16830641589937354658821114729054602764967670109647373910496617480300042678772\"]",
+   "acceptingOrdersTimestamp": "2025-08-21T19:13:25Z"
+  }
+ ]
+}

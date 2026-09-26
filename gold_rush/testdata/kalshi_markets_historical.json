@@ -1,0 +1,36 @@
+{
+ "markets": [
+  {
+   "close_time": "2026-01-11T04:35:21.2844Z",
+   "custom_strike": {
+    "football_team": "08c52d1f-7ce1-445f-be72-97de0554ecc8"
+   },
+   "event_ticker": "KXNFLGAME-26JAN10GBCHI",
+   "expected_expiration_time": "2026-01-11T04:00:00Z",
+   "no_sub_title": "Green Bay",
+   "open_time": "2026-01-05T05:00:00Z",
+   "result": "no",
+   "status": "finalized",
+   "ticker": "KXNFLGAME-26JAN10GBCHI-GB",
+   "title": "Green Bay at Chicago Winner?",
+   "volume_fp": "27580074.00",
+   "yes_sub_title": "Green Bay"
+  },
+  {
+   "close_time": "2026-01-11T04:35:21.2844Z",
+   "custom_strike": {
+    "football_team": "9a77500a-1945-495e-b6f5-5c35bedaa8b9"
+   },
+   "event_ticker": "KXNFLGAME-26JAN10GBCHI",
+   "expected_expiration_time": "2026-01-11T04:00:00Z",
+   "no_sub_title": "Chicago",
+   "open_time": "2026-01-05T05:00:00Z",
+   "result": "yes",
+   "status": "finalized",
+   "ticker": "KXNFLGAME-26JAN10GBCHI-CHI",
+   "title": "Green Bay at Chicago Winner?",
+   "volume_fp": "56261713.00",
+   "yes_sub_title": "Chicago"
+  }
+ ]
+}

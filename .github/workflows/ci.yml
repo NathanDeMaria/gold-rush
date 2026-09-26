@@ -1,0 +1,39 @@
+name: Lint and test
+
+on:
+  # Push only builds main. Everything else gets its coverage from the
+  # pull_request trigger, so a branch with an open PR isn't built twice.
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+    - name: Install dependencies
+      run: uv sync --locked
+    - name: ruff format --check
+      run: uv run ruff format --check .
+    - name: ruff check
+      run: uv run ruff check .
+    - name: ty check
+      run: uv run ty check .
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: astral-sh/setup-uv@v5
+      with:
+        enable-cache: true
+    - name: Install dependencies
+      run: uv sync --locked
+    - name: pytest
+      run: uv run pytest
