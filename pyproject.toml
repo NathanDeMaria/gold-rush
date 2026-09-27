@@ -24,10 +24,11 @@ gold-rush = "gold_rush.cli:main"
 # revs cassandra pins, which agree with each other: endgame-aws at 78f7661
 # resolves endgame at 9ec6c0f. Bump them together, and with cassandra.
 #
-# call-it-what-you-want is pinned to the branch that adds the venue names and
-# `Teams.find`; move it to main once that merges.
+# call-it-what-you-want at the main commit that added the venue names and
+# `Teams.find` (call-it-what-you-want#10). A venue code nobody had filed gets
+# its row there, and then this pin moves.
 [tool.uv.sources]
-call-it-what-you-want = { git = "https://github.com/NathanDeMaria/call-it-what-you-want.git", rev = "cc25e01f2552fafc024802455f1d46a310a047e5" }
+call-it-what-you-want = { git = "https://github.com/NathanDeMaria/call-it-what-you-want.git", rev = "062bcd7310fc607747a0b6d3b4cd274e1ace1f8d" }
 endgame = { git = "https://github.com/NathanDeMaria/EndGame.git", rev = "9ec6c0f43018f43b5eb037ad8856aefaff6bd93c", subdirectory = "py-endgame" }
 endgame-aws = { git = "https://github.com/NathanDeMaria/EndGame.git", rev = "78f76618b2b81cebb4a161775e057fb97d691d18", subdirectory = "py-endgame-aws" }
 
