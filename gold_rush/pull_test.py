@@ -1,4 +1,5 @@
 import json
+import pickle
 from datetime import UTC, date, datetime
 from pathlib import Path
 
@@ -148,3 +149,29 @@ async def test_an_unknown_venue_is_refused(tmp_path: Path) -> None:
             store=LocalStore(tmp_path),
             games=[],
         )
+
+
+async def test_read_games_reads_only_the_seasons_that_can_hold_the_days(
+    tmp_path: Path,
+) -> None:
+    from endgame.types import Season, Week
+
+    from .pull import read_games
+
+    def write(year: int, when: datetime, game_id: str) -> None:
+        path = tmp_path / "seasons" / str(year) / "mens.pkl"
+        path.parent.mkdir(parents=True)
+        game = Game("A", 0, "B", 0, False, True, when, game_id)
+        path.write_bytes(pickle.dumps([Season([Week([game], 1)], year)]))
+
+    # A January game lives in the season named for the year before.
+    write(2025, datetime(2026, 1, 10, 1, tzinfo=UTC), "in-2025-season")
+    write(2026, datetime(2026, 11, 10, 1, tzinfo=UTC), "in-2026-season")
+    # Unreadable if it's ever opened, which it mustn't be.
+    old = tmp_path / "seasons" / "2019" / "mens.pkl"
+    old.parent.mkdir(parents=True)
+    old.write_bytes(b"not a pickle")
+
+    games = await read_games("mens", date(2026, 1, 9), date(2026, 1, 11), str(tmp_path))
+
+    assert [game.game_id for game in games] == ["in-2025-season"]
