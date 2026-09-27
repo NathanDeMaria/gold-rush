@@ -135,6 +135,15 @@ Gamma's listings stop paging past an offset of about 2,000. Python's
 default user agent gets a 403. This is Polymarket's international venue;
 Polymarket US, where a US account trades, is a separate exchange.
 
+## On Batch
+
+Pulls run on AWS Batch, on the queue cassandra and endgame share: one job
+definition, and a daily pull of yesterday's games for each venue and league,
+from 10:00 Central, after endgame's seasons have refreshed. A backfill is the
+same job with dates. `jobs/` is the terraform, and its README the setup and
+the commands; the image is the `Dockerfile` here, pushed by CI on every merge
+to main.
+
 ## Development
 
 ```shell

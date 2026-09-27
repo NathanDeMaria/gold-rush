@@ -1,0 +1,15 @@
+.venv/
+.git/
+.github/
+jobs/
+out/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.env
+**/*.env
+
+# NOTE: config.json is deliberately NOT ignored. The image copies it to
+# ~app/.aws-batch/config.json, which is where endgame_aws's Config finds the
+# bucket name. Without it every job dies at startup on FileNotFoundError.

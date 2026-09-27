@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars and fill in. Everything has a default; this is only
+# for overriding one locally.
+
+# CI tags each build with the short commit SHA. `latest` follows main; pin a
+# SHA to make a run reproducible.
+image_tag = "latest"
+
+# Defaults: every venue x league, daily from 10:00 Central, a league every 15
+# minutes.
+# pull_hour              = 10
+# league_spacing_minutes = 15
