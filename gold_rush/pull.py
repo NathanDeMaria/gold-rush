@@ -108,19 +108,27 @@ async def read_games(league: str, start: date, end: date, source: str) -> list[G
     `source` is `s3://bucket` for the stored seasons, or a directory laid
     out like the bucket (`seasons/{year}/{league}.pkl`) for trying a pull
     against a copy.
+
+    Only the seasons that can hold those days are read. endgame names a
+    season for the year it starts in, so a January basketball game is in
+    the previous year's season: a day's games are in its year's season or
+    the one before, and a daily pull reads two files rather than every
+    season since 2001.
     """
+    years = set(range(start.year - 1, end.year + 1))
     if source.startswith("s3://"):
         bucket = source.removeprefix("s3://").strip("/")
         seasons = [
             season
             async for key in list_all_keys(bucket, "seasons/")
-            if _is_season_of(key, league)
+            if _season_year(key, league) in years
             for season in await read_seasons(bucket, key)
         ]
     else:
         seasons = [
             season
             for path in sorted(Path(source).glob(f"seasons/*/{league}.pkl"))
+            if _season_year(str(path.relative_to(source)), league) in years
             for season in _unpickle(path)
         ]
     low, high = start - timedelta(days=2), end + timedelta(days=2)
@@ -208,9 +216,12 @@ def _day_file(venue: str, league: str, day: date, records: list[dict]) -> bytes:
 _SEASON_KEY = re.compile(r"^seasons/(\d+)/([^/]+)\.pkl$")
 
 
-def _is_season_of(key: str, league: str) -> bool:
+def _season_year(key: str, league: str) -> int | None:
+    """The season year a stored key is for, if it's one of `league`'s."""
     found = _SEASON_KEY.match(key)
-    return found is not None and found.group(2) == league
+    if found is None or found.group(2) != league:
+        return None
+    return int(found.group(1))
 
 
 def _unpickle(path: Path) -> list[Season]:
