@@ -1,0 +1,140 @@
+name: Backfill
+
+# Queue `gold-rush pull` over a range of days on Batch, from the Actions tab
+# rather than a laptop with credentials. Submits and returns: a season takes
+# the better part of an hour per venue, and the job's own summary (CloudWatch,
+# or `gold-rush report`) is where its result is read, not this run.
+on:
+  workflow_dispatch:
+    inputs:
+      venue:
+        description: Venue
+        type: choice
+        options: [both, kalshi, polymarket]
+        default: both
+      league:
+        description: League
+        type: choice
+        options: [all, nfl, ncaafb, mens, womens]
+      start:
+        description: First day, YYYY-MM-DD (US Eastern game days)
+        type: string
+        required: true
+      end:
+        description: Last day, YYYY-MM-DD; blank for just the first day
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AWS_REGION: us-east-2
+  # The shared queue's name and this stack's job definition. Carried as
+  # constants, the way image.yml carries the shared state's coordinates: if
+  # either moves, the backfill role's policy (jobs/oidc.tf) moves with the
+  # terraform and this fails loudly on AccessDenied rather than submitting
+  # somewhere else.
+  JOB_QUEUE: job-queue
+  JOB_DEFINITION: gold-rush-pull
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Inputs arrive through env, never interpolated into the script, so a
+      # date field can't become shell.
+      - name: Check the inputs
+        env:
+          ROLE_ARN: ${{ secrets.AWS_BACKFILL_ROLE_ARN }}
+          VENUE: ${{ inputs.venue }}
+          LEAGUE: ${{ inputs.league }}
+          START: ${{ inputs.start }}
+          END: ${{ inputs.end }}
+        run: |
+          # Asked for by hand, so a missing piece is red, not a quiet skip.
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "Run this from main: the backfill role trusts nothing else." >&2
+            exit 1
+          fi
+          if [ -z "$ROLE_ARN" ]; then
+            echo "AWS_BACKFILL_ROLE_ARN is not set (terraform output ci_backfill_role_arn)." >&2
+            exit 1
+          fi
+
+          end=${END:-$START}
+          for d in "$START" "$end"; do
+            if ! [[ "$d" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] \
+              || [ "$(date -d "$d" +%F 2>/dev/null)" != "$d" ]; then
+              echo "Not a date: '$d'" >&2
+              exit 1
+            fi
+          done
+          if [[ "$end" < "$START" ]]; then
+            echo "end $end is before start $START" >&2
+            exit 1
+          fi
+
+          case "$VENUE" in
+            both) venues="kalshi polymarket" ;;
+            *) venues="$VENUE" ;;
+          esac
+          case "$LEAGUE" in
+            # The schedules' order, so a full backfill takes turns the same way.
+            all) leagues="nfl ncaafb mens womens" ;;
+            *) leagues="$LEAGUE" ;;
+          esac
+          {
+            echo "VENUES=$venues"
+            echo "LEAGUES=$leagues"
+            echo "START_DAY=$START"
+            echo "END_DAY=$end"
+          } >> "$GITHUB_ENV"
+
+      - uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_BACKFILL_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # One chain per venue, the leagues in turn within it: every job leaves
+      # through the same few instances, which a venue sees as one client, so
+      # two leagues of one venue shouldn't run at once -- see jobs/README.md.
+      # The venues are different hosts and run side by side.
+      #
+      # A job that fails after its retries fails every job after it in its
+      # chain (Batch's dependsOn), so a re-run starts from the league that
+      # failed. Re-pulling a day replaces its file whole, so overlap is safe.
+      - name: Submit
+        run: |
+          {
+            echo "### Backfill $START_DAY .. $END_DAY"
+            echo
+            echo "| venue | league | job | after |"
+            echo "| --- | --- | --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          for venue in $VENUES; do
+            previous=""
+            for league in $LEAGUES; do
+              overrides=$(jq -nc --arg v "$venue" --arg l "$league" \
+                --arg s "$START_DAY" --arg e "$END_DAY" \
+                '{command: ["pull", $v, $l, $s, $e]}')
+              args=(
+                --job-name "gold-rush-backfill-$venue-$league"
+                --job-queue "$JOB_QUEUE"
+                --job-definition "$JOB_DEFINITION"
+                --container-overrides "$overrides"
+              )
+              if [ -n "$previous" ]; then
+                args+=(--depends-on "jobId=$previous")
+              fi
+              id=$(aws batch submit-job "${args[@]}" --query jobId --output text)
+              echo "$venue $league: $id"
+              link="https://${AWS_REGION}.console.aws.amazon.com/batch/home?region=${AWS_REGION}#jobs/detail/${id}"
+              echo "| $venue | $league | [\`$id\`]($link) | ${previous:--} |" \
+                >> "$GITHUB_STEP_SUMMARY"
+              previous=$id
+            done
+          done

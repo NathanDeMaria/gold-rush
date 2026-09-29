@@ -41,7 +41,16 @@ few requests and an empty summary.
 ## Running it by hand
 
 A backfill, or a day that needs pulling again after a fix in
-call-it-what-you-want, is the same definition with a command:
+call-it-what-you-want, is the same definition with a command.
+
+From the Actions tab, **Backfill** on main takes a venue (or both), a league
+(or all), and a range of days, and submits the jobs through the
+`gold-rush-ci-backfill` role. "All" chains the leagues one after another per
+venue, in the schedules' order, with the venues side by side; a league that
+fails fails the rest of its chain, so re-run from there. The run links each
+job and returns without waiting.
+
+Or from anywhere with credentials:
 
 ```bash
 aws batch submit-job --job-name gold-rush-backfill \
@@ -68,7 +77,8 @@ Once, in this order:
    create IAM roles -- the CI roles this stack creates can't exist before it
    does. It creates the job definition, the schedules and the three CI roles.
 3. **The CI secrets**, from this stack's outputs (see `outputs.tf`):
-   `AWS_PLAN_ROLE_ARN`, `AWS_APPLY_ROLE_ARN`, `AWS_IMAGE_ROLE_ARN`.
+   `AWS_PLAN_ROLE_ARN`, `AWS_APPLY_ROLE_ARN`, `AWS_IMAGE_ROLE_ARN`, and
+   `AWS_BACKFILL_ROLE_ARN` for the backfill workflow.
 4. **An image.** Any push to main after that builds and pushes
    `gold-rush:latest`, which the job definition runs. Until one exists, a
    scheduled job fails to pull its image and the failure email says so.

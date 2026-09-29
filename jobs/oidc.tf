@@ -252,6 +252,48 @@ resource "aws_iam_role_policy_attachment" "ci_image" {
   policy_arn = aws_iam_policy.ci_image.arn
 }
 
+# ------------------------------------------------------------------------------
+# Backfill role: main only, and only enough to submit the pull job.
+#
+# What .github/workflows/backfill.yml assumes to queue a range of days, so a
+# backfill needs no credentials on a laptop. Its own role for the same reason
+# the image role is one: submitting a job is far smaller than an apply.
+#
+# SubmitJob is authorized against both the job definition and the queue, so
+# both are named. The definition is listed bare and with `:*` because a submit
+# by name is checked against the revision it resolves to. No PassRole: the
+# definition already carries its roles, and the workflow never overrides them.
+# ------------------------------------------------------------------------------
+
+resource "aws_iam_role" "ci_backfill" {
+  name               = "${var.resource_name_prefix}-ci-backfill"
+  description        = "Submit ${module.pull.name} backfills from main of ${var.github_repository}"
+  assume_role_policy = data.aws_iam_policy_document.apply_assume_role.json
+}
+
+data "aws_iam_policy_document" "ci_backfill" {
+  statement {
+    sid     = "SubmitPulls"
+    actions = ["batch:SubmitJob"]
+    resources = [
+      "arn:${data.aws_partition.current.partition}:batch:${var.aws_region}:${data.aws_caller_identity.current.account_id}:job-definition/${module.pull.name}",
+      "arn:${data.aws_partition.current.partition}:batch:${var.aws_region}:${data.aws_caller_identity.current.account_id}:job-definition/${module.pull.name}:*",
+      local.shared.job_queue_arn,
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ci_backfill" {
+  name        = "${var.resource_name_prefix}-ci-backfill"
+  description = "Submit ${module.pull.name} to the shared job queue"
+  policy      = data.aws_iam_policy_document.ci_backfill.json
+}
+
+resource "aws_iam_role_policy_attachment" "ci_backfill" {
+  role       = aws_iam_role.ci_backfill.name
+  policy_arn = aws_iam_policy.ci_backfill.arn
+}
+
 
 # ------------------------------------------------------------------------------
 # Apply role: main only.
