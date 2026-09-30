@@ -1,8 +1,11 @@
+import asyncio
 import json
 from datetime import UTC, date, datetime
 from pathlib import Path
+from typing import Any, cast
 
-from .kalshi import KALSHI, event_day, games_from_markets, price_points
+from .kalshi import KALSHI, Kalshi, event_day, games_from_markets, price_points
+from .leagues import league
 from .types import PricePoint
 
 TESTDATA = Path(__file__).parent / "testdata"
@@ -110,3 +113,54 @@ def test_an_hour_nobody_traded_still_has_its_quotes() -> None:
 
     assert point == PricePoint(1789491600, None, 0.24, 0.72, 0.0)
     assert datetime.fromtimestamp(point.at, UTC).year == 2026
+
+
+class _ListingHttp:
+    """Answers the two requests a listing makes, and keeps what was asked."""
+
+    def __init__(self, markets: list[dict]) -> None:
+        self.markets = markets
+        self.asked: list[dict[str, Any]] = []
+
+    async def get_json(self, url: str, params: dict[str, Any] | None = None) -> dict:
+        if url.endswith("/historical/cutoff"):
+            return {"market_settled_ts": "2026-08-01T00:00:00Z"}
+        self.asked.append(params or {})
+        return {"markets": self.markets, "cursor": ""}
+
+
+def _open_market(team: str, close: str) -> dict:
+    return {
+        "ticker": f"KXNFLGAME-26OCT01SFLA-{team}",
+        "event_ticker": "KXNFLGAME-26OCT01SFLA",
+        "yes_sub_title": team,
+        "open_time": "2026-09-24T14:00:00Z",
+        "close_time": close,
+        "status": "active",
+    }
+
+
+def test_an_open_market_is_listed_before_its_game() -> None:
+    """Thursday's game, listed on Wednesday, while its market is still open.
+
+    An open market is scheduled to close about two days after the game --
+    here 2026-10-04 00:15 UTC for a 2026-10-01 game -- so a close-time filter
+    that stops three days past the last day asked for misses it.
+    """
+    http = _ListingHttp(
+        [
+            _open_market("SF", "2026-10-04T00:15:00Z"),
+            _open_market("LA", "2026-10-04T00:15:00Z"),
+        ]
+    )
+
+    games, _ = asyncio.run(
+        Kalshi(cast(Any, http)).games(
+            league("nfl"), date(2026, 9, 30), date(2026, 10, 1)
+        )
+    )
+
+    [asked] = http.asked
+    closes = datetime(2026, 10, 4, 0, 15, tzinfo=UTC).timestamp()
+    assert asked["max_close_ts"] > closes
+    assert [game.day for game in games] == [date(2026, 10, 1)]

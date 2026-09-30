@@ -8,8 +8,8 @@ from call_it_what_you_want import ESPN, KALSHI, NCAAFB, Team, TeamName, Teams
 from endgame.types import Game
 
 from . import pull as pull_module
-from .pull import FIELDS, pull
-from .store import PULLS, LocalStore
+from .pull import FIELDS, pull, upcoming
+from .store import PULLS, UPCOMING, LocalStore
 from .summary import PullSummary, render
 from .types import PricePoint, Side, VenueGame
 
@@ -175,3 +175,40 @@ async def test_read_games_reads_only_the_seasons_that_can_hold_the_days(
     games = await read_games("mens", date(2026, 1, 9), date(2026, 1, 11), str(tmp_path))
 
     assert [game.game_id for game in games] == ["in-2025-season"]
+
+
+class FailingVenue(FakeVenue):
+    """A venue whose listing is down."""
+
+    name = "polymarket"
+
+    async def games(self, league, start, end):
+        raise ConnectionError("listing is down")
+
+
+async def test_the_hourly_pull_writes_what_it_can_and_names_what_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Both venues, every league given, and a failure that costs only itself.
+
+    Its summaries go under `_upcoming/`, so the daily pulls' `_pulls/` -- what
+    `gold-rush report` reads -- has none of them.
+    """
+    monkeypatch.setattr(
+        pull_module, "VENUES", {KALSHI: FakeVenue, "polymarket": FailingVenue}
+    )
+    monkeypatch.setattr(pull_module, "default_teams", lambda namespace: TEAMS)
+    store = LocalStore(tmp_path)
+
+    summaries, failures = await upcoming(
+        date(2026, 9, 26), date(2026, 9, 27), store=store, games={"ncaafb": GAMES}
+    )
+
+    assert [(s.venue, s.league, s.matched) for s in summaries] == [
+        (KALSHI, "ncaafb", 1)
+    ]
+    assert failures == ["polymarket/ncaafb: ConnectionError('listing is down')"]
+    assert (tmp_path / "markets/kalshi/ncaafb/2026-09-26.json").exists()
+    assert await store.keys(PULLS) == []
+    [key] = await store.keys(UPCOMING)
+    assert key.startswith("markets/_upcoming/kalshi/ncaafb/")

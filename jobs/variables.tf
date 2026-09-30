@@ -39,6 +39,19 @@ variable "pull_hour" {
   default     = 10
 }
 
+variable "upcoming_minute" {
+  description = <<-EOT
+    Minute past each hour the hourly pull of today's and tomorrow's games
+    starts (`gold-rush upcoming`).
+
+    Off the quarter hours the daily pulls start on (`pull_hour`,
+    `league_spacing_minutes`), which each take a minute or two, so the hourly
+    one never shares a venue with them.
+  EOT
+  type        = number
+  default     = 50
+}
+
 variable "league_spacing_minutes" {
   description = <<-EOT
     Minutes between one league's pulls and the next's.

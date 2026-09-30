@@ -36,6 +36,14 @@ _PERIOD_MINUTES = 60
 # Candles asked for per request. Kalshi doesn't document a cap; two weeks
 # of hours is well inside anything it's been seen to return.
 _HISTORY_WINDOW = timedelta(days=14)
+# How far past the last day asked for the live tier's close-time filter
+# reaches. A settled market closes when its game does, but an open one is
+# scheduled to close about two days after it -- 1.9 days past its expected
+# expiration on every open NFL and college football market in September 2026
+# -- and only moves up if it settles early. Three days missed a Thursday
+# night game the day before it was played; the listing is trimmed to the days
+# asked for anyway, so the margin costs a few more markets listed.
+_OPEN_CLOSE_MARGIN = timedelta(days=7)
 _EVENT_DATE = re.compile(r"-(\d{2})([A-Z]{3})(\d{2})")
 _MONTHS: dict[str, int] = {
     name: number
@@ -134,11 +142,12 @@ class Kalshi:
         Every game in `league` filed on a day from `start` to `end`, and the
         events that didn't parse as one.
 
-        A market closes when its game settles, so the live tier is asked for
-        markets closing from `start` to a few days past `end` -- a Monday
-        night game settles on Tuesday, UTC -- and trimmed to the days asked
-        for. The historical tier is read whole, since it ignores the filter,
-        and only when the window reaches back past its cutoff.
+        A settled market closes when its game does -- a Monday night game on
+        Tuesday, UTC -- and an open one is scheduled to close days after it,
+        so the live tier is asked for markets closing from `start` to
+        `_OPEN_CLOSE_MARGIN` past `end`, and trimmed to the days asked for.
+        The historical tier is read whole, since it ignores the filter, and
+        only when the window reaches back past its cutoff.
         """
         cutoff = await self._historical_cutoff()
         games, odd = [], []
@@ -148,7 +157,7 @@ class Kalshi:
                 {
                     "series_ticker": series,
                     "min_close_ts": _epoch(start),
-                    "max_close_ts": _epoch(end + timedelta(days=3)),
+                    "max_close_ts": _epoch(end + _OPEN_CLOSE_MARGIN),
                 },
             )
             found, bad = games_from_markets(live, league.name, series, False)
