@@ -41,9 +41,13 @@ few requests and an empty summary.
 ## Running it by hand
 
 A backfill, or a day that needs pulling again after a fix in
-call-it-what-you-want, is the same definition with a command:
+call-it-what-you-want, is the same definition with a command. The
+definition runs `:latest`, so after merging a fix, wait for CI's image of
+it first -- a pull submitted before it lands runs the old code and still
+succeeds:
 
 ```bash
+jobs/wait-for-image.sh    # exits 0 once latest is origin/main's build
 aws batch submit-job --job-name gold-rush-backfill \
   --job-queue "$(terraform output -raw job_queue_name)" \
   --job-definition "$(terraform output -raw job_definition)" \
