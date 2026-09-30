@@ -199,7 +199,7 @@ wheels = [
 [[package]]
 name = "call-it-what-you-want"
 version = "0.1.0"
-source = { git = "https://github.com/NathanDeMaria/call-it-what-you-want.git?rev=062bcd7310fc607747a0b6d3b4cd274e1ace1f8d#062bcd7310fc607747a0b6d3b4cd274e1ace1f8d" }
+source = { git = "https://github.com/NathanDeMaria/call-it-what-you-want.git?rev=904d49e2efa0f31b679ef208c8da79169ece5c35#904d49e2efa0f31b679ef208c8da79169ece5c35" }
 
 [[package]]
 name = "colorama"
@@ -372,7 +372,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp", specifier = ">=3.9" },
-    { name = "call-it-what-you-want", git = "https://github.com/NathanDeMaria/call-it-what-you-want.git?rev=062bcd7310fc607747a0b6d3b4cd274e1ace1f8d" },
+    { name = "call-it-what-you-want", git = "https://github.com/NathanDeMaria/call-it-what-you-want.git?rev=904d49e2efa0f31b679ef208c8da79169ece5c35" },
     { name = "endgame", git = "https://github.com/NathanDeMaria/EndGame.git?subdirectory=py-endgame&rev=9ec6c0f43018f43b5eb037ad8856aefaff6bd93c" },
     { name = "endgame-aws", git = "https://github.com/NathanDeMaria/EndGame.git?subdirectory=py-endgame-aws&rev=78f76618b2b81cebb4a161775e057fb97d691d18" },
     { name = "fire", specifier = ">=0.7.0" },
