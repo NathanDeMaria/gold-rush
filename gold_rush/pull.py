@@ -17,7 +17,7 @@ import json
 import pickle
 import re
 from collections import defaultdict
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
@@ -30,7 +30,7 @@ from .kalshi import KALSHI, Kalshi
 from .leagues import league as league_named
 from .match import Matched, Schedule, match
 from .polymarket import POLYMARKET, Polymarket
-from .store import Store, day_key, pull_key
+from .store import PULLS, UPCOMING, Store, day_key, pull_key
 from .summary import PullSummary
 from .types import PricePoint, VenueGame
 
@@ -48,13 +48,14 @@ async def pull(
     store: Store,
     games: Iterable[Game],
     teams: Teams | None = None,
+    summaries: str = PULLS,
 ) -> PullSummary:
     """
     Pull `venue`'s games in `league` from `start` to `end`, into `store`.
 
     `games` is endgame's games for the league around those days -- see
     `read_games` -- and `teams` the registry to resolve both sides' names
-    in, the bundled one by default.
+    in, the bundled one by default. The summary goes under `summaries`.
     """
     if venue not in VENUES:
         raise ValueError(f"No venue {venue!r}. Available: {', '.join(VENUES)}.")
@@ -97,8 +98,58 @@ async def pull(
             await store.write(key, _day_file(venue, league, day, records))
             summary.written.append(key)
     summary.finished_at = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
-    await store.write(pull_key(venue, league, summary.started_at), summary.to_json())
+    await store.write(
+        pull_key(venue, league, summary.started_at, summaries), summary.to_json()
+    )
     return summary
+
+
+async def upcoming(
+    start: date,
+    end: date,
+    *,
+    store: Store,
+    games: Mapping[str, Iterable[Game]],
+    venues: Iterable[str] = tuple(VENUES),
+) -> tuple[list[PullSummary], list[str]]:
+    """
+    Every venue's prices on every league in `games`, for `start` to `end`.
+
+    The hourly job, for games that haven't been played: a day's file written
+    during the day carries prices up to that hour, and the morning-after
+    daily pull replaces it with the whole thing. `games` maps each league to
+    endgame's games around those days (`read_games`).
+
+    The venues run side by side -- different hosts -- and each one's leagues
+    take turns, the way the daily schedules are spaced, so neither venue sees
+    more than one pull at a time. A league that fails doesn't cost the others:
+    it's returned as `"venue/league: error"` beside the summaries, for the
+    caller to fail the job on once everything else is written. Summaries go
+    under `UPCOMING`, not beside the daily ones.
+    """
+    failures: list[str] = []
+
+    async def one_venue(venue: str) -> list[PullSummary]:
+        done = []
+        for league, league_games in games.items():
+            try:
+                done.append(
+                    await pull(
+                        venue,
+                        league,
+                        start,
+                        end,
+                        store=store,
+                        games=league_games,
+                        summaries=UPCOMING,
+                    )
+                )
+            except Exception as exc:  # reported, and fails the job at the end
+                failures.append(f"{venue}/{league}: {exc!r}")
+        return done
+
+    per_venue = await asyncio.gather(*(one_venue(venue) for venue in venues))
+    return [summary for done in per_venue for summary in done], failures
 
 
 async def read_games(league: str, start: date, end: date, source: str) -> list[Game]:

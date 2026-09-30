@@ -4,6 +4,7 @@ gold-rush's command line.
     gold-rush games kalshi ncaafb 2026-09-19             # what a venue lists
     gold-rush pull kalshi nfl                            # yesterday, to the bucket
     gold-rush pull polymarket mens 2025-11-03 2026-04-07 # a season's backfill
+    gold-rush upcoming                                   # today and tomorrow, all of it
     gold-rush report                                     # what recent pulls did
 
 `pull` and `report` default to the bucket endgame's seasons live in, read
@@ -17,10 +18,11 @@ import sys
 from datetime import date, datetime, timedelta
 
 from .http import Http
+from .leagues import LEAGUES
 from .leagues import league as league_named
 from .match import EASTERN
-from .pull import VENUES, pull, read_games
-from .store import PULLS, open_store
+from .pull import VENUES, pull, read_games, upcoming
+from .store import PULLS, UPCOMING, open_store
 from .summary import PullSummary, render
 
 
@@ -70,6 +72,36 @@ class Cli:
         print(render(summary))
         print(f"wrote to {store.describe()}", file=sys.stderr)
 
+    def upcoming(
+        self,
+        days: int = 2,
+        out: str | None = None,
+        games_from: str | None = None,
+    ) -> None:
+        """
+        Pull every venue and league for today and the `days - 1` after it.
+
+        The hourly job: prices on the games that haven't been played, so a
+        page can show the market before a game rather than the morning after
+        it. Each day's file is replaced with prices up to now, and the daily
+        `pull` of yesterday replaces it once more with the whole game. Exits
+        non-zero if any venue and league failed, after writing the rest.
+        """
+        if days < 1:
+            raise SystemExit(f"days must be at least 1, not {days}")
+        first = datetime.now(EASTERN).date()
+        last = first + timedelta(days=days - 1)
+        store = open_store(out or _bucket())
+        summaries, failures = asyncio.run(
+            _upcoming(first, last, store, games_from or _bucket())
+        )
+        for summary in summaries:
+            print(render(summary, misses=3))
+        print(f"wrote to {store.describe()}", file=sys.stderr)
+        if failures:
+            print("\n".join(["failed:", *failures]), file=sys.stderr)
+            raise SystemExit(1)
+
     def report(
         self,
         out: str | None = None,
@@ -77,14 +109,18 @@ class Cli:
         league: str | None = None,
         last: int = 5,
         misses: int = 10,
+        upcoming: bool = False,
     ) -> None:
         """
         Print what the most recent pulls did, newest first.
 
             gold-rush report --venue kalshi --last 3
+            gold-rush report --upcoming          # the hourly pulls instead
+
         """
         store = open_store(out or _bucket())
-        prefix = "/".join(p for p in (PULLS, venue, league) if p)
+        root = UPCOMING if upcoming else PULLS
+        prefix = "/".join(p for p in (root, venue, league) if p)
         summaries = asyncio.run(_summaries(store, prefix, last))
         if not summaries:
             print(f"No pulls under {store.describe()}/{prefix}.")
@@ -103,6 +139,13 @@ async def _list(venue: str, league: str, start: date, end: date):
 async def _pull(venue, league, start, end, store, games_from):
     games = await read_games(league, start, end, games_from)
     return await pull(venue, league, start, end, store=store, games=games)
+
+
+async def _upcoming(start, end, store, games_from):
+    games = {
+        league: await read_games(league, start, end, games_from) for league in LEAGUES
+    }
+    return await upcoming(start, end, store=store, games=games)
 
 
 async def _summaries(store, prefix: str, last: int) -> list[PullSummary]:

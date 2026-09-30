@@ -38,6 +38,16 @@ the two venues are different hosts, so they run together.
 All year, and all eight: a league out of season lists nothing, which is a
 few requests and an empty summary.
 
+And hourly, at :50, one more: `gold-rush upcoming`, every venue and league
+for today and tomorrow, so the games that haven't been played have a price
+before they are -- the games page's market column reads them. A day's file
+written during the day carries prices up to that hour, and the daily pull
+the morning after replaces it with the whole game. It's one job rather than
+a schedule per pair, to keep it at 24 a day on the shared queue; inside it
+the two venues run side by side and each one's leagues take turns. Its
+summaries go to `markets/_upcoming/` rather than `_pulls/`, so they don't
+bury the daily ones -- `gold-rush report --upcoming` reads them.
+
 ## Running it by hand
 
 A backfill, or a day that needs pulling again after a fix in

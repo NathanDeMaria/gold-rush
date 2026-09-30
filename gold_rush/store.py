@@ -3,6 +3,7 @@ Where a pull's output goes, and the one layout it's written in.
 
     markets/{venue}/{league}/{YYYY-MM-DD}.json
     markets/_pulls/{venue}/{league}/{YYYYMMDDTHHMMSSZ}.json
+    markets/_upcoming/{venue}/{league}/{YYYYMMDDTHHMMSSZ}.json
 
 The first is the prices: one file per venue, league and ESPN game day
 (US Eastern), holding every game on that day the pull matched. A re-pull of
@@ -11,7 +12,10 @@ the unit cassandra reads.
 
 The second is what each pull did -- see `summary`. It's the log that's
 meant to be read: what was listed, what matched, what didn't and why,
-without opening a container's stdout.
+without opening a container's stdout. The third is the same, for the
+hourly pulls of games that haven't been played yet (`pull.upcoming`): kept
+apart because there are two dozen of them a day per venue and league, and
+`gold-rush report` is for reading the daily ones.
 
 A store is a local directory or a bucket. Local is for trying things; the
 scheduled pull writes to the bucket endgame's seasons and odds live in.
@@ -25,14 +29,15 @@ from endgame_aws.io import list_all_keys, read_bytes, save_data_to_s3
 
 PREFIX = "markets"
 PULLS = f"{PREFIX}/_pulls"
+UPCOMING = f"{PREFIX}/_upcoming"
 
 
 def day_key(venue: str, league: str, day: str) -> str:
     return f"{PREFIX}/{venue}/{league}/{day}.json"
 
 
-def pull_key(venue: str, league: str, started_at: str) -> str:
-    return f"{PULLS}/{venue}/{league}/{started_at}.json"
+def pull_key(venue: str, league: str, started_at: str, under: str = PULLS) -> str:
+    return f"{under}/{venue}/{league}/{started_at}.json"
 
 
 class Store(Protocol):

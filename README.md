@@ -14,6 +14,7 @@ actually get.
 gold-rush games kalshi ncaafb 2026-09-19               # what a venue lists, parsed
 gold-rush pull kalshi nfl                              # yesterday, to the bucket
 gold-rush pull polymarket mens 2025-11-03 2026-04-07   # a season's backfill
+gold-rush upcoming                                     # today and tomorrow, everything
 gold-rush report --last 3                              # what recent pulls did
 ```
 
@@ -29,6 +30,7 @@ Both venues' market data is free to read without an account.
 ```
 markets/{venue}/{league}/{YYYY-MM-DD}.json          one ESPN game day, US Eastern
 markets/_pulls/{venue}/{league}/{started}.json      what one pull did
+markets/_upcoming/{venue}/{league}/{started}.json   what one hourly pull did
 ```
 
 A day's file holds every game on that day the pull matched:
@@ -139,8 +141,10 @@ Polymarket US, where a US account trades, is a separate exchange.
 
 Pulls run on AWS Batch, on the queue cassandra and endgame share: one job
 definition, and a daily pull of yesterday's games for each venue and league,
-from 10:00 Central, after endgame's seasons have refreshed. A backfill is the
-same job with dates. `jobs/` is the terraform, and its README the setup and
+from 10:00 Central, after endgame's seasons have refreshed -- and hourly, one
+`gold-rush upcoming` for today's and tomorrow's games, whose files the next
+morning's daily pull replaces with the whole game. A backfill is the same job
+with dates. `jobs/` is the terraform, and its README the setup and
 the commands; the image is the `Dockerfile` here, pushed by CI on every merge
 to main.
 

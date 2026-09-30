@@ -154,6 +154,25 @@ module "daily_pull" {
   command = ["pull", each.value.venue, each.value.league]
 }
 
+# Hourly, for the games that haven't been played: every venue and league for
+# today and tomorrow in one job (`gold-rush upcoming`), so a page can show the
+# market before a game rather than the morning after it. One job rather than a
+# schedule per pair keeps it to 24 a day on the shared queue; inside it the
+# venues run side by side and each one's leagues take turns, as above. At
+# `upcoming_minute` past the hour, clear of the daily pulls' quarter hours, so
+# the two never hit a venue at once.
+module "upcoming_pull" {
+  source = "git::https://github.com/NathanDeMaria/aws-batch-optimization.git//infra/modules/job_schedule?ref=main"
+
+  schedule_name       = "${var.resource_name_prefix}-upcoming-hourly"
+  schedule_expression = "cron(${var.upcoming_minute} * * * ? *)"
+  schedule_timezone   = var.schedule_timezone
+  job_definition      = module.pull.name
+  job_queue_arn       = local.shared.job_queue_arn
+  scheduler_role_arn  = local.shared.batch_scheduler_role_arn
+  command             = ["upcoming"]
+}
+
 # No failure notification here. endgame/jobs/main.tf's EventBridge rule
 # emails on any job entering FAILED on the shared queue -- this one included --
 # so a second topic would be a second email about the same failure.
