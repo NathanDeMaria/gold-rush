@@ -46,8 +46,10 @@ definition runs `:latest`, so after merging a fix, wait for CI's image of
 it first -- a pull submitted before it lands runs the old code and still
 succeeds:
 
+`wait-for-image.sh` in aws-batch-optimization's `batch-tools` plugin does
+that wait -- see its skill. Then:
+
 ```bash
-jobs/wait-for-image.sh    # exits 0 once latest is origin/main's build
 aws batch submit-job --job-name gold-rush-backfill \
   --job-queue "$(terraform output -raw job_queue_name)" \
   --job-definition "$(terraform output -raw job_definition)" \

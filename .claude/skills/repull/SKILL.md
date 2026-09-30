@@ -18,16 +18,14 @@ the CLI prefers the keys, and the calls go out as the wrong principal.
 ## 1. Wait for the image
 
 The definition runs `gold-rush:latest` and a submit can't override it. So
-first make sure `latest` is the build of the commit with the fix:
+first make sure `latest` is the build of the commit with the fix, with the
+`wait-for-image` skill from aws-batch-optimization's `batch-tools` plugin
+(`claude plugin install batch-tools@aws-batch-optimization`). Run it from
+this checkout, passing `--profile` if there is one. Submit only on exit 0;
+on anything else, stop and report the line it printed.
 
-```bash
-jobs/wait-for-image.sh [--profile <name>] [<sha>]   # default: origin/main
-```
-
-Run it in the background; it exits when there's an answer. 0 means submit.
-1 means the Image run failed or went green without pushing, and 2 means
-there's no Image run for that commit -- either way, stop and report the line
-it printed. Don't submit on anything but 0.
+If the plugin isn't installed, say so rather than submitting without the
+wait.
 
 ## 2. Submit
 
