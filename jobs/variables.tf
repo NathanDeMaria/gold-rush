@@ -85,18 +85,10 @@ variable "pull_timeout_seconds" {
   default     = 14400
 }
 
-variable "shared_infra_state" {
-  description = "Where aws-batch-optimization keeps its state, read for the queue, the bucket, the ECR repo and the shared roles"
-  type = object({
-    bucket = string
-    key    = string
-    region = string
-  })
-  default = {
-    bucket = "nathan-terraform"
-    key    = "batch-state"
-    region = "us-east-2"
-  }
+variable "shared_outputs_parameter" {
+  description = "SSM parameter aws-batch-optimization publishes its outputs to, read for the queue, the bucket, the ECR repo and the shared roles"
+  type        = string
+  default     = "/batch/shared-outputs"
 }
 
 variable "github_repository" {
