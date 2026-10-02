@@ -28,10 +28,11 @@ output "job_role_arn" {
 # ------------------------------------------------------------------------------
 # CI
 # ------------------------------------------------------------------------------
-# Set these as repository secrets, where the workflows read them:
-#   gh secret set AWS_PLAN_ROLE_ARN  --body "$(terraform output -raw ci_plan_role_arn)"
-#   gh secret set AWS_APPLY_ROLE_ARN --body "$(terraform output -raw ci_apply_role_arn)"
-#   gh secret set AWS_IMAGE_ROLE_ARN --body "$(terraform output -raw ci_image_role_arn)"
+# Set these as repository *variables* (not secrets -- a role ARN isn't one, and
+# the workflows read them from `vars`):
+#   gh variable set AWS_PLAN_ROLE_ARN  --body "$(terraform output -raw ci_plan_role_arn)"
+#   gh variable set AWS_APPLY_ROLE_ARN --body "$(terraform output -raw ci_apply_role_arn)"
+#   gh variable set AWS_IMAGE_ROLE_ARN --body "$(terraform output -raw ci_image_role_arn)"
 
 output "ci_plan_role_arn" {
   description = "role-to-assume for plan jobs (any branch, any PR)"
