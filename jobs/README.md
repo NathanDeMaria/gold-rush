@@ -83,8 +83,9 @@ Once, in this order:
 2. **This stack, by hand.** `make apply` here with credentials that can
    create IAM roles -- the CI roles this stack creates can't exist before it
    does. It creates the job definition, the schedules and the three CI roles.
-3. **The CI secrets**, from this stack's outputs (see `outputs.tf`):
-   `AWS_PLAN_ROLE_ARN`, `AWS_APPLY_ROLE_ARN`, `AWS_IMAGE_ROLE_ARN`.
+3. **The CI role variables**, from this stack's outputs (see `outputs.tf`):
+   `AWS_PLAN_ROLE_ARN`, `AWS_APPLY_ROLE_ARN`, `AWS_IMAGE_ROLE_ARN`, as
+   repository *variables* -- not secrets, which the workflows don't read.
 4. **An image.** Any push to main after that builds and pushes
    `gold-rush:latest`, which the job definition runs. Until one exists, a
    scheduled job fails to pull its image and the failure email says so.
