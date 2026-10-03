@@ -172,6 +172,6 @@ module "upcoming_pull" {
   command             = ["upcoming"]
 }
 
-# No failure notification here. endgame/jobs/main.tf's EventBridge rule
-# emails on any job entering FAILED on the shared queue -- this one included --
-# so a second topic would be a second email about the same failure.
+# No failure notification here. aws-batch-optimization's alerts.tf emails on
+# any job entering FAILED on the shared queue, for every app -- this one
+# included -- so a topic here would be a second email about the same failure.

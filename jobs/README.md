@@ -15,8 +15,8 @@ Runs `gold-rush pull` on AWS Batch, on the shared queue from
 | `batch-execution-role`, `batch-scheduler-role` | The three CI roles (`oidc.tf`) |
 | The `batch_job` and `job_schedule` modules | |
 
-Failure emails are shared too: endgame's EventBridge rule emails on any job
-entering FAILED on the queue, this one's included.
+Failure emails are shared too: aws-batch-optimization's `alerts.tf` emails on
+any job entering FAILED on the queue, this one's included.
 
 ## The schedule
 
