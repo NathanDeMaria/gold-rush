@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Kalshi and Polymarket prices on the games cassandra predicts, matched to ESPN games."
 readme = "README.md"
 authors = []
-requires-python = ">=3.12"
+requires-python = ">=3.15"
 dependencies = [
     "aiohttp>=3.9",
     # Which ESPN team a venue's code is. The venue names live there, not
@@ -20,9 +20,11 @@ dependencies = [
 [project.scripts]
 gold-rush = "gold_rush.cli:main"
 
-# None of these are published. The two EndGame packages are pinned to the
-# revs cassandra pins, which agree with each other: endgame-aws at 78f7661
-# resolves endgame at 9ec6c0f. Bump them together, and with cassandra.
+# None of these are published. The two EndGame packages agree with each
+# other: endgame-aws at b336c04 resolves endgame at d92745d. Bump them
+# together. b336c04 (EndGame #120) is the first whose pyarrow range reaches
+# 26, the first pyarrow with Python 3.15 wheels; nothing this reads --
+# `endgame.types`, `read_seasons`, the S3 io helpers -- changed since 78f7661.
 #
 # call-it-what-you-want at the main commit that filed Polymarket's codes for
 # the four schools its roster leaves out and its 2025 football slugs
@@ -30,15 +32,15 @@ gold-rush = "gold_rush.cli:main"
 # there, and then this pin moves.
 [tool.uv.sources]
 call-it-what-you-want = { git = "https://github.com/NathanDeMaria/call-it-what-you-want.git", rev = "904d49e2efa0f31b679ef208c8da79169ece5c35" }
-endgame = { git = "https://github.com/NathanDeMaria/EndGame.git", rev = "9ec6c0f43018f43b5eb037ad8856aefaff6bd93c", subdirectory = "py-endgame" }
-endgame-aws = { git = "https://github.com/NathanDeMaria/EndGame.git", rev = "78f76618b2b81cebb4a161775e057fb97d691d18", subdirectory = "py-endgame-aws" }
+endgame = { git = "https://github.com/NathanDeMaria/EndGame.git", rev = "d92745dbec14a76f5b694a914051b7b5e928caba", subdirectory = "py-endgame" }
+endgame-aws = { git = "https://github.com/NathanDeMaria/EndGame.git", rev = "b336c0490ca34b49b355bbce372a0d3998c4fbf2", subdirectory = "py-endgame-aws" }
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.5",
+    "pytest>=9.0.2",
     "pytest-asyncio>=1.3.0",
-    "ruff>=0.16.1",
-    "ty>=0.0.65",
+    "ruff>=0.17.3",
+    "ty>=0.0.94",
 ]
 
 [build-system]
@@ -48,14 +50,29 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["gold_rush"]
 
-[tool.pytest.ini_options]
-asyncio_mode = "auto"
+# Below here is the template's. `copier update` brings changes to it from
+# mirrorball, so per-repo additions are better made as new keys than as edits.
 
 [tool.ruff]
 line-length = 88
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]
+# Ruff's defaults (E4, E7, E9, F), import sorting, and pyupgrade -- which
+# reads requires-python to decide what's outdated.
+select = ["E4", "E7", "E9", "F", "I", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["gold_rush"]
+
+[tool.ty.terminal]
+# A warning fails `make check` and CI, same as an error. Silence one on purpose
+# with `# ty: ignore[rule]`, which ty itself flags once it's no longer needed.
+error-on-warning = true
+
+[tool.pytest]
+# Unknown markers, bad config keys and xfails that pass are failures.
+strict = true
+asyncio_mode = "auto"
 
 [tool.ruff.lint.per-file-ignores]
 # these just re-export names for the public API

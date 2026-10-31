@@ -1,15 +1,18 @@
 # What runs on Batch: `gold-rush pull <venue> <league>`, and nothing else.
 #
-# 3.13-bookworm, pinned by digest so a rebuild is the same interpreter. The
-# full image rather than -slim, as cassandra's is, because it already has git,
-# which uv needs to clone the three git dependencies (call-it-what-you-want,
-# endgame, endgame-aws) at their pinned revs -- so there's no apt step.
-FROM python@sha256:227b6570d6ee07061ae6ca2eb04dedfb6d2b34045835f343065b9869e4d427ea
+# 3.15.2-trixie, pinned by the digest of the multi-platform index -- the same
+# image mirrorball's devcontainer uses, so the job and the devcontainer run
+# one interpreter. The full image rather than -slim, as cassandra's is,
+# because it already has git, which uv needs to clone the three git
+# dependencies (call-it-what-you-want, endgame, endgame-aws) at their pinned
+# revs -- so there's no apt step.
+FROM python@sha256:a51b0cd81c9c0fc08afc4a823843b459dc71c9386a02ccb150097b41d783f33b
 
-# uv from PyPI rather than copied out of its ghcr.io image: the one install
-# path that works anywhere pip does.
-RUN pip install --no-cache-dir uv==0.8.17 \
-    && useradd --uid 1000 --create-home app
+# uv at the version mirrorball pins, copied out of its own image (by index
+# digest, ghcr.io/astral-sh/uv:0.13.6) rather than pip-installed into the
+# interpreter the job runs on.
+COPY --from=ghcr.io/astral-sh/uv@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0 /uv /uvx /usr/local/bin/
+RUN useradd --uid 1000 --create-home app
 
 USER app
 WORKDIR /home/app/gold-rush
