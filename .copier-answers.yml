@@ -1,0 +1,9 @@
+# Changes here will be overwritten by Copier
+_commit: v1.0.0
+_src_path: gh:NathanDeMaria/mirrorball
+aws: true
+description: Kalshi and Polymarket prices on the games cassandra predicts, matched
+    to ESPN games.
+kind: app
+module_name: gold_rush
+project_name: gold-rush

@@ -1,7 +1,15 @@
-.venv/
 __pycache__/
-*.pyc
+.venv/
+dist/
 .pytest_cache/
 .ruff_cache/
+.env
+
+# Machine-local devcontainer settings; local.env.example is the tracked copy
+.devcontainer/local.env
+
+# This repo's own (the rules above are mirrorball's)
+*.pyc
 /out/
+# The shared stack outputs the image build copies in; written by CI or by hand
 config.json

@@ -1,39 +1,43 @@
-name: Lint and test
+# Template-owned (mirrorball). One job named `ci`, because that is the check
+# the branch ruleset requires: a red `ci` blocks the merge.
+name: CI
 
 on:
-  # Push only builds main. Everything else gets its coverage from the
-  # pull_request trigger, so a branch with an open PR isn't built twice.
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
 
+# Superseded PR runs are pointless, but let pushes to main finish
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
-
+    env:
+      # Inline annotations on the PR diff instead of plain console output
+      RUFF_OUTPUT_FORMAT: github
+      TY_OUTPUT_FORMAT: github
     steps:
-    - uses: actions/checkout@v4
-    - uses: astral-sh/setup-uv@v5
-      with:
-        enable-cache: true
-    - name: Install dependencies
-      run: uv sync --locked
-    - name: ruff format --check
-      run: uv run ruff format --check .
-    - name: ruff check
-      run: uv run ruff check .
-    - name: ty check
-      run: uv run ty check .
+      - uses: actions/checkout@v7
 
-  test:
-    runs-on: ubuntu-latest
+      # Installs uv, restores its cache keyed on uv.lock, and provisions the
+      # interpreter from .python-version -- the same pins as the devcontainer.
+      - uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.13.6"
+          python-version: "3.15"
+          enable-cache: true
 
-    steps:
-    - uses: actions/checkout@v4
-    - uses: astral-sh/setup-uv@v5
-      with:
-        enable-cache: true
-    - name: Install dependencies
-      run: uv sync --locked
-    - name: pytest
-      run: uv run pytest
+      # --locked: a uv.lock that doesn't match pyproject.toml fails here rather
+      # than being quietly re-resolved. Its own step so a resolution failure
+      # isn't reported as a lint failure.
+      - name: Install dependencies
+        run: uv sync --locked
+
+      - name: Lint
+        run: make check
+
+      - name: Test
+        run: make test

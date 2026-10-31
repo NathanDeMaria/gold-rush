@@ -150,13 +150,16 @@ to main.
 
 ## Development
 
+Open the folder in its devcontainer, or with uv installed:
+
 ```shell
-uv sync
-uv run ruff format .
-uv run ruff check .
-uv run ty check .
-uv run pytest
+make check   # ruff format --check, ruff check, ty -- what CI runs
+make lint    # same, fixing what it can
+make test    # pytest
 ```
+
+Tooling comes from the [mirrorball](https://github.com/NathanDeMaria/mirrorball)
+template; the image targets (`make build`, `make push`) are in `project.mk`.
 
 Tests live next to the code they cover, named `*_test.py`, and run against
 responses recorded from both venues in `gold_rush/testdata/`.

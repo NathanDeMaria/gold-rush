@@ -1,5 +1,10 @@
-.venv/
-.git/
+.git
+.venv
+__pycache__
+dist
+.devcontainer/local.env
+
+# This repo's own (the rules above are mirrorball's)
 .github/
 jobs/
 out/
