@@ -50,7 +50,7 @@ class PullSummary:
         return json.dumps(asdict(self), indent=1).encode()
 
     @classmethod
-    def from_json(cls, data: bytes) -> "PullSummary":
+    def from_json(cls, data: bytes) -> PullSummary:
         return cls(**json.loads(data))
 
 
