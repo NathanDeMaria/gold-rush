@@ -45,6 +45,10 @@ class PullSummary:
     # {"event", "error"}, one per game whose history couldn't be fetched.
     errors: list[dict[str, str]] = field(default_factory=list)
     written: list[str] = field(default_factory=list)
+    # Games the written days' files already held that this pull didn't list,
+    # kept beside the ones it did (see `pull`). Summaries from before this
+    # existed read as 0.
+    kept: int = 0
 
     def to_json(self) -> bytes:
         return json.dumps(asdict(self), indent=1).encode()
@@ -62,7 +66,8 @@ def render(summary: PullSummary, *, misses: int = 10) -> str:
         f"  listed {summary.listed}  matched {summary.matched}"
         f"  unmatched {len(summary.unmatched)}  priced {summary.priced}"
         f"  no prices {len(summary.empty)}  errors {len(summary.errors)}"
-        f"  points {summary.points:,}  files {len(summary.written)}",
+        f"  points {summary.points:,}  files {len(summary.written)}"
+        + (f"  kept {summary.kept}" if summary.kept else ""),
     ]
     for miss in summary.unmatched[:misses]:
         lines.append(
