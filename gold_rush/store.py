@@ -6,9 +6,10 @@ Where a pull's output goes, and the one layout it's written in.
     markets/_upcoming/{venue}/{league}/{YYYYMMDDTHHMMSSZ}.json
 
 The first is the prices: one file per venue, league and ESPN game day
-(US Eastern), holding every game on that day the pull matched. A re-pull of
-a day replaces its file, so pulling a range twice is safe, and a day is
-the unit cassandra reads.
+(US Eastern), holding every game any pull matched to that day. A re-pull
+replaces the games it lists again and keeps the rest, so pulling a range
+twice is safe, and a day is the unit cassandra reads -- see `pull` for why
+a day's file can hold games from a pull of the day either side.
 
 The second is what each pull did -- see `summary`. It's the log that's
 meant to be read: what was listed, what matched, what didn't and why,
@@ -25,7 +26,12 @@ import asyncio
 from pathlib import Path
 from typing import Protocol
 
-from endgame_aws.io import list_all_keys, read_bytes, save_data_to_s3
+from endgame_aws.io import (
+    S3NotFoundException,
+    list_all_keys,
+    read_bytes,
+    save_data_to_s3,
+)
 
 PREFIX = "markets"
 PULLS = f"{PREFIX}/_pulls"
@@ -47,6 +53,8 @@ class Store(Protocol):
 
     async def read(self, key: str) -> bytes: ...
 
+    async def read_if_exists(self, key: str) -> bytes | None: ...
+
     async def keys(self, prefix: str) -> list[str]: ...
 
 
@@ -64,6 +72,12 @@ class LocalStore:
 
     async def read(self, key: str) -> bytes:
         return await asyncio.to_thread((self.root / key).read_bytes)
+
+    async def read_if_exists(self, key: str) -> bytes | None:
+        try:
+            return await self.read(key)
+        except FileNotFoundError:
+            return None
 
     async def keys(self, prefix: str) -> list[str]:
         base = self.root / prefix
@@ -88,6 +102,12 @@ class S3Store:
 
     async def read(self, key: str) -> bytes:
         return await read_bytes(self.bucket, key)
+
+    async def read_if_exists(self, key: str) -> bytes | None:
+        try:
+            return await self.read(key)
+        except S3NotFoundException:
+            return None
 
     async def keys(self, prefix: str) -> list[str]:
         return sorted([key async for key in list_all_keys(self.bucket, prefix)])

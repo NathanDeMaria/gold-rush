@@ -63,7 +63,11 @@ sum to one. Polymarket's are one book, so they do.
 `home` and `away` are ESPN's, never the venue's, so a neutral-site game
 is no different from any other.
 
-A re-pull of a day replaces its file, so pulling a range twice is safe.
+A pull writes into a day's file, not over it: it replaces the games it
+lists again and keeps the rest. So pulling a range twice is safe, and a
+game a venue dates a day off from ESPN stays in its day -- Kalshi tickers a
+7 pm tip in Honolulu with the next day's date, so the pull that lists it is
+the next day's, writing into a file it didn't otherwise list.
 
 ## Matching
 

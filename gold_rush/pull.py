@@ -9,7 +9,17 @@ way keeps what it finished.
 
 A day's file holds only matched games. What didn't match is in the pull's
 summary with its reason, and pulling the same days again after the fix --
-usually a row in call-it-what-you-want -- replaces the day's file whole.
+usually a row in call-it-what-you-want -- replaces those days' games.
+
+A pull writes into a day's file rather than over it. The day a venue files
+a game under and the day ESPN does can differ: Kalshi's ticker for a 7 pm
+tip in Honolulu carries the next day's date, while ESPN's Eastern day is
+the one it tipped on. So a pull of one day's listing writes a game or two
+into the day before's file, and a file replaced whole would keep only
+those -- every hourly pull from 2026-11-03 cut Kalshi's men's 2026-11-02
+from 129 games to the one Seattle at Hawai'i. Each write keeps the file's
+games except the ones this pull listed again, which it replaces: a re-pull
+is still safe, and a game another pull matched to the day stays.
 """
 
 import asyncio
@@ -75,6 +85,7 @@ async def pull(
         client = VENUES[venue](http)
         listed, summary.odd_events = await client.games(spec, start, end)
         summary.listed = len(listed)
+        relisted = {game.event for game in listed}
         by_day: dict[date, list[tuple[VenueGame, Matched]]] = defaultdict(list)
         for game in listed:
             result = match(game, schedule, spec, teams)
@@ -95,7 +106,9 @@ async def pull(
             if not records:
                 continue
             key = day_key(venue, league, day.isoformat())
-            await store.write(key, _day_file(venue, league, day, records))
+            kept = _kept(await store.read_if_exists(key), relisted, records)
+            summary.kept += len(kept)
+            await store.write(key, _day_file(venue, league, day, kept + records))
             summary.written.append(key)
     summary.finished_at = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     await store.write(
@@ -248,6 +261,30 @@ def _record(
         "home": side(home),
         "away": side(away),
     }
+
+
+def _kept(
+    existing: bytes | None, relisted: set[str], records: list[dict]
+) -> list[dict]:
+    """The games in a day's file that a write of `records` leaves in place.
+
+    Everything but what this pull has a newer answer for: any game whose
+    venue event it listed -- matched again, or now unmatched, as a full
+    re-pull would drop it -- or whose ESPN game it matched. A file written
+    with other columns is from a layout these rows can't sit beside, and is
+    replaced.
+    """
+    if existing is None:
+        return []
+    day = json.loads(existing)
+    if day.get("fields") != list(FIELDS):
+        return []
+    replaced = {record["game_id"] for record in records}
+    return [
+        game
+        for game in day["games"]
+        if game["event"] not in relisted and game["game_id"] not in replaced
+    ]
 
 
 def _day_file(venue: str, league: str, day: date, records: list[dict]) -> bytes:

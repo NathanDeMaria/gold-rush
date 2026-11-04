@@ -212,3 +212,110 @@ async def test_the_hourly_pull_writes_what_it_can_and_names_what_failed(
     assert await store.keys(PULLS) == []
     [key] = await store.keys(UPCOMING)
     assert key.startswith("markets/_upcoming/kalshi/ncaafb/")
+
+
+def _day_with(tmp_path: Path, *games: dict, fields: list[str] = list(FIELDS)) -> Path:
+    """A day's file as an earlier pull left it."""
+    path = tmp_path / "markets/kalshi/ncaafb/2026-09-26.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "venue": KALSHI,
+                "league": "ncaafb",
+                "day": "2026-09-26",
+                "read_at": "2026-09-27T15:00:00+00:00",
+                "fields": fields,
+                "games": list(games),
+            }
+        )
+    )
+    return path
+
+
+def _stored_game(game_id: str, event: str) -> dict:
+    return {"game_id": game_id, "event": event, "home": {}, "away": {}}
+
+
+async def _pull_the_day(tmp_path: Path) -> PullSummary:
+    return await pull(
+        KALSHI,
+        "ncaafb",
+        date(2026, 9, 26),
+        date(2026, 9, 26),
+        store=LocalStore(tmp_path),
+        games=GAMES,
+        teams=TEAMS,
+    )
+
+
+async def test_a_pull_keeps_the_games_another_pull_put_in_the_day(
+    tmp_path: Path, fake_venue: None
+) -> None:
+    """The day either side's pull is how a game lands in a file it didn't list.
+
+    Kalshi tickers a 7 pm tip in Honolulu with the next day's date, so the
+    pull that lists it writes it into ESPN's day before -- a file holding
+    that day's own games, which must still be there afterwards.
+    """
+    path = _day_with(tmp_path, _stored_game("400", "KXNCAAFGAME-26SEP26AAABBB"))
+
+    summary = await _pull_the_day(tmp_path)
+
+    games = json.loads(path.read_text())["games"]
+    assert sorted(game["game_id"] for game in games) == ["400", "401"]
+    assert summary.kept == 1
+    assert "kept 1" in render(summary)
+
+
+async def test_a_re_pull_replaces_the_games_it_lists_again(
+    tmp_path: Path, fake_venue: None
+) -> None:
+    await _pull_the_day(tmp_path)
+    summary = await _pull_the_day(tmp_path)
+
+    day = json.loads((tmp_path / summary.written[0]).read_text())
+    assert [game["game_id"] for game in day["games"]] == ["401"]
+    assert summary.kept == 0
+
+
+async def test_a_game_the_pull_lists_but_no_longer_matches_is_dropped(
+    tmp_path: Path, fake_venue: None
+) -> None:
+    """What a full re-pull has always done with a match that's since gone.
+
+    The fake venue lists ZZZ at Oregon State and can't match it; an earlier
+    pull that could (or a game id the pull matched again) is out of date.
+    """
+    path = _day_with(
+        tmp_path,
+        _stored_game("399", "KXNCAAFGAME-26SEP26ZZZORST"),
+        _stored_game("401", "KXNCAAFGAME-26SEP26OLDEVENT"),
+    )
+
+    await _pull_the_day(tmp_path)
+
+    games = json.loads(path.read_text())["games"]
+    assert [(game["game_id"], game["event"]) for game in games] == [
+        ("401", "KXNCAAFGAME-26SEP26WSUORST")
+    ]
+
+
+async def test_a_day_written_with_other_columns_is_replaced(
+    tmp_path: Path, fake_venue: None
+) -> None:
+    path = _day_with(
+        tmp_path,
+        _stored_game("400", "KXNCAAFGAME-26SEP26AAABBB"),
+        fields=["at", "price"],
+    )
+
+    await _pull_the_day(tmp_path)
+
+    assert [game["game_id"] for game in json.loads(path.read_text())["games"]] == [
+        "401"
+    ]
+
+
+async def test_a_missing_key_reads_as_nothing(tmp_path: Path) -> None:
+    assert await LocalStore(tmp_path).read_if_exists("markets/nope.json") is None
