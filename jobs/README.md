@@ -23,19 +23,19 @@ any job entering FAILED on the queue, this one's included.
 One job definition, and a daily schedule per venue and league, each running
 `gold-rush pull <venue> <league>` for yesterday's games (US Eastern):
 
-| | kalshi | polymarket |
-| --- | --- | --- |
-| nfl | 10:00 CT | 10:00 CT |
-| ncaafb | 10:15 | 10:15 |
-| mens | 10:30 | 10:30 |
-| womens | 10:45 | 10:45 |
+| | kalshi | polymarket | polymarket_us |
+| --- | --- | --- | --- |
+| nfl | 10:00 CT | 10:00 CT | 10:00 CT |
+| ncaafb | 10:15 | 10:15 | 10:15 |
+| mens | 10:30 | 10:30 | 10:30 |
+| womens | 10:45 | 10:45 | 10:45 |
 
 Ten o'clock so endgame's daily `games` jobs (08:00) have refreshed the
 seasons a pull matches against. The leagues take turns because every job
 leaves through the same few instances, which both venues see as one client;
-the two venues are different hosts, so they run together.
+the venues are different hosts, so they run together.
 
-All year, and all eight: a league out of season lists nothing, which is a
+All year, and all twelve: a league out of season lists nothing, which is a
 few requests and an empty summary.
 
 And hourly, at :50, one more: `gold-rush upcoming`, every venue and league
@@ -44,7 +44,9 @@ before they are -- the games page's market column reads them. A day's file
 written during the day carries prices up to that hour, and the daily pull
 the morning after replaces it with the whole game. It's one job rather than
 a schedule per pair, to keep it at 24 a day on the shared queue; inside it
-the two venues run side by side and each one's leagues take turns. Its
+the venues run side by side and each one's leagues take turns. Then it
+snapshots Polymarket US's order book on every open game into
+`markets/_books/` (`gold-rush books`), the only record of size there. Its
 summaries go to `markets/_upcoming/` rather than `_pulls/`, so they don't
 bury the daily ones -- `gold-rush report --upcoming` reads them.
 

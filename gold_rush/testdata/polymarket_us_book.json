@@ -1,0 +1,141 @@
+{
+ "marketData": {
+  "marketSlug": "aec-cfb-wmich-akron-2026-11-10",
+  "bids": [
+   {
+    "px": {
+     "value": "0.8450",
+     "currency": "USD"
+    },
+    "qty": "5230.1600"
+   },
+   {
+    "px": {
+     "value": "0.8400",
+     "currency": "USD"
+    },
+    "qty": "2600.1300"
+   },
+   {
+    "px": {
+     "value": "0.8350",
+     "currency": "USD"
+    },
+    "qty": "9577.5200"
+   },
+   {
+    "px": {
+     "value": "0.8300",
+     "currency": "USD"
+    },
+    "qty": "996.6800"
+   },
+   {
+    "px": {
+     "value": "0.8250",
+     "currency": "USD"
+    },
+    "qty": "6231.0000"
+   },
+   {
+    "px": {
+     "value": "0.8200",
+     "currency": "USD"
+    },
+    "qty": "24035.0000"
+   }
+  ],
+  "offers": [
+   {
+    "px": {
+     "value": "0.8500",
+     "currency": "USD"
+    },
+    "qty": "13686.4000"
+   },
+   {
+    "px": {
+     "value": "0.8550",
+     "currency": "USD"
+    },
+    "qty": "17540.5200"
+   },
+   {
+    "px": {
+     "value": "0.8600",
+     "currency": "USD"
+    },
+    "qty": "5819.0000"
+   },
+   {
+    "px": {
+     "value": "0.8650",
+     "currency": "USD"
+    },
+    "qty": "3933.0000"
+   },
+   {
+    "px": {
+     "value": "0.8700",
+     "currency": "USD"
+    },
+    "qty": "29278.9200"
+   },
+   {
+    "px": {
+     "value": "0.8750",
+     "currency": "USD"
+    },
+    "qty": "933.0000"
+   }
+  ],
+  "state": "MARKET_STATE_OPEN",
+  "stats": {
+   "openPx": {
+    "value": "0.8200",
+    "currency": "USD"
+   },
+   "lowPx": {
+    "value": "0.8100",
+    "currency": "USD"
+   },
+   "highPx": {
+    "value": "0.8850",
+    "currency": "USD"
+   },
+   "lastTradePx": {
+    "value": "0.8500",
+    "currency": "USD"
+   },
+   "sharesTraded": "79841.3900",
+   "notionalTraded": {
+    "value": "67343.6465",
+    "currency": "USD"
+   },
+   "lastTradeQty": "11.6000",
+   "openInterest": "37226.5500",
+   "openSetTime": "2026-11-01T10:27:31.581331366Z",
+   "highSetTime": "2026-11-07T13:48:58.161580801Z",
+   "lowSetTime": "2026-11-01T10:27:31.581331366Z",
+   "lastTradeSetTime": "2026-11-09T22:31:20.605603652Z",
+   "openInterestSetTime": "2026-11-09T22:24:09.569351654Z",
+   "notionalSetTime": "2026-11-09T22:31:20.605603652Z",
+   "currentPx": {
+    "value": "0.8475",
+    "currency": "USD"
+   },
+   "lastPriceSample": {
+    "longPx": {
+     "value": "0.8500",
+     "currency": "USD"
+    },
+    "shortPx": {
+     "value": "0.15",
+     "currency": "USD"
+    },
+    "ts": "2026-11-09T23:39:41.017991864Z"
+   }
+  },
+  "transactTime": "2026-11-09T23:39:41.017991864Z"
+ }
+}

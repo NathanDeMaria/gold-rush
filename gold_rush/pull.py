@@ -40,11 +40,13 @@ from .kalshi import KALSHI, Kalshi
 from .leagues import league as league_named
 from .match import Matched, Schedule, match
 from .polymarket import POLYMARKET, Polymarket
-from .store import PULLS, UPCOMING, Store, day_key, pull_key
+from .polymarket_us import POLYMARKET_US, PolymarketUs, book_levels
+from .store import PULLS, UPCOMING, Store, book_key, day_key, pull_key
 from .summary import PullSummary
 from .types import PricePoint, VenueGame
 
-VENUES = {KALSHI: Kalshi, POLYMARKET: Polymarket}
+VENUES = {KALSHI: Kalshi, POLYMARKET: Polymarket, POLYMARKET_US: PolymarketUs}
+type Client = Kalshi | Polymarket | PolymarketUs
 # The columns of each price row in a day's file, in order.
 FIELDS = ("at", "price", "bid", "ask", "volume")
 
@@ -123,7 +125,7 @@ async def upcoming(
     *,
     store: Store,
     games: Mapping[str, Iterable[Game]],
-    venues: Iterable[str] = tuple(VENUES),
+    venues: Iterable[str] | None = None,
 ) -> tuple[list[PullSummary], list[str]]:
     """
     Every venue's prices on every league in `games`, for `start` to `end`.
@@ -141,6 +143,7 @@ async def upcoming(
     under `UPCOMING`, not beside the daily ones.
     """
     failures: list[str] = []
+    venues = tuple(VENUES) if venues is None else tuple(venues)
 
     async def one_venue(venue: str) -> list[PullSummary]:
         done = []
@@ -163,6 +166,89 @@ async def upcoming(
 
     per_venue = await asyncio.gather(*(one_venue(venue) for venue in venues))
     return [summary for done in per_venue for summary in done], failures
+
+
+async def snapshot_books(
+    leagues: Iterable[str], *, store: Store
+) -> tuple[list[str], list[str]]:
+    """
+    Polymarket US's order book on every open game in each of `leagues`.
+
+    Its price history has the best ask and bid but no size, and a book is
+    only ever now, so this is the only record of how much could have been
+    bought. One file per league per run, keyed by event and unmatched; each
+    side is what buying it cost, `[price, contracts]` best first, out to
+    ten cents past the best price. Returns the keys written and, as
+    `"polymarket_us/league: error"`, the leagues that failed.
+    """
+    written: list[str] = []
+    failures: list[str] = []
+    async with Http(per_second=PolymarketUs.per_second) as http:
+        client = PolymarketUs(http)
+        for name in leagues:
+            try:
+                read_at = datetime.now(UTC)
+                games = await client.open_games(league_named(name))
+                books = await asyncio.gather(
+                    *(client.book(game) for game in games), return_exceptions=True
+                )
+                records = []
+                for game, book in zip(games, books):
+                    if isinstance(book, BaseException):
+                        failures.append(
+                            f"{POLYMARKET_US}/{name} {game.event}: {book!r}"
+                        )
+                        continue
+                    records.append(_book_record(game, book))
+                key = book_key(POLYMARKET_US, name, read_at.strftime("%Y%m%dT%H%M%SZ"))
+                await store.write(
+                    key,
+                    json.dumps(
+                        {
+                            "venue": POLYMARKET_US,
+                            "league": name,
+                            "read_at": read_at.isoformat(),
+                            "fields": ["price", "contracts"],
+                            "games": records,
+                        }
+                    ).encode(),
+                )
+                written.append(key)
+            except Exception as exc:  # reported, and fails the job at the end
+                failures.append(f"{POLYMARKET_US}/{name}: {exc!r}")
+    return written, failures
+
+
+def _book_record(game: VenueGame, book: dict) -> dict:
+    long_levels, short_levels = book_levels(book)
+    data = book.get("marketData") or {}
+    stats = data.get("stats") or {}
+
+    def side(index: int, levels: list[list[float]]) -> dict:
+        venue_side = game.sides[index]
+        return {
+            "code": venue_side.code,
+            "names": list(venue_side.names),
+            "asks": levels,
+        }
+
+    return {
+        "event": game.event,
+        "market": game.extra["market"],
+        "kickoff": game.kickoff.isoformat() if game.kickoff else None,
+        "state": data.get("state"),
+        "book_at": data.get("transactTime"),
+        "contracts_traded": _number(stats.get("sharesTraded")),
+        "long": side(0, long_levels),
+        "short": side(1, short_levels),
+    }
+
+
+def _number(value: object) -> float | None:
+    try:
+        return None if value is None else float(str(value))
+    except ValueError:
+        return None
 
 
 async def read_games(league: str, start: date, end: date, source: str) -> list[Game]:
@@ -206,7 +292,7 @@ async def read_games(league: str, start: date, end: date, source: str) -> list[G
 
 
 async def _price_day(
-    client: Kalshi | Polymarket,
+    client: Client,
     pairs: list[tuple[VenueGame, Matched]],
     summary: PullSummary,
 ) -> list[dict]:
@@ -228,7 +314,7 @@ async def _price_day(
 
 
 async def _both_sides(
-    client: Kalshi | Polymarket, game: VenueGame
+    client: Client, game: VenueGame
 ) -> tuple[list[PricePoint], list[PricePoint]]:
     first, second = await asyncio.gather(
         client.history(game, game.sides[0]), client.history(game, game.sides[1])

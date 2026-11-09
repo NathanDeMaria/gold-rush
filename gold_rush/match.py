@@ -24,16 +24,17 @@ from collections import defaultdict
 from collections.abc import Iterable
 from datetime import UTC, date, datetime, timedelta
 from typing import NamedTuple
-from zoneinfo import ZoneInfo
 
 from call_it_what_you_want import ESPN, Teams
 from endgame.types import Game
 
 from .leagues import League
-from .types import Side, VenueGame
+from .polymarket_us import POLYMARKET_US, SPELLED_AS
+from .types import EASTERN, Side, VenueGame
 
-# Both venues file a game under its US Eastern date, and so does this.
-EASTERN = ZoneInfo("America/New_York")
+# A venue whose teams are filed in call-it-what-you-want under another's
+# spellings: Polymarket US writes the international venue's codes.
+_SPELLED_AS = {POLYMARKET_US: SPELLED_AS}
 
 
 class ScheduledGame(NamedTuple):
@@ -119,11 +120,12 @@ def side_ids(side: Side, venue: str, league: League, teams: Teams) -> frozenset[
     Polymarket's leaves out UNC Wilmington and still prices its games.
     """
     scope = {"league": league.names_league}
+    source = _SPELLED_AS.get(venue, venue)
     found = {
         team.espn_id
         for spelling in (side.code, *side.names)
         if spelling
-        for team in teams.find(spelling, source=venue, **scope)
+        for team in teams.find(spelling, source=source, **scope)
     }
     if not found:
         found = {
