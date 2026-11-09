@@ -13,7 +13,7 @@ variable "image_tag" {
 variable "venues" {
   description = "The venues pulled daily. Each is `gold-rush pull <venue> <league>`'s first argument."
   type        = list(string)
-  default     = ["kalshi", "polymarket"]
+  default     = ["kalshi", "polymarket", "polymarket_us"]
 }
 
 variable "leagues" {

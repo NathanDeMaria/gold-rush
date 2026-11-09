@@ -1,7 +1,7 @@
 # gold-rush
 
-Kalshi and Polymarket prices on the games cassandra predicts, matched to the
-ESPN games endgame stores.
+Kalshi, Polymarket and Polymarket US prices on the games cassandra predicts,
+matched to the ESPN games endgame stores.
 
 A pull lists one venue's games in one league over a range of days, matches
 each to an ESPN game, fetches the hourly price history of both sides, and
@@ -15,6 +15,7 @@ gold-rush games kalshi ncaafb 2026-09-19               # what a venue lists, par
 gold-rush pull kalshi nfl                              # yesterday, to the bucket
 gold-rush pull polymarket mens 2025-11-03 2026-04-07   # a season's backfill
 gold-rush upcoming                                     # today and tomorrow, everything
+gold-rush books                                        # Polymarket US's open order books
 gold-rush report --last 3                              # what recent pulls did
 ```
 
@@ -23,7 +24,7 @@ config unless `--out` names a directory; `pull` matches against the seasons
 there unless `--games-from` names another (a directory laid out like the
 bucket works).
 
-Both venues' market data is free to read without an account.
+Every venue's market data is free to read without an account.
 
 ## What gets written
 
@@ -31,6 +32,7 @@ Both venues' market data is free to read without an account.
 markets/{venue}/{league}/{YYYY-MM-DD}.json          one ESPN game day, US Eastern
 markets/_pulls/{venue}/{league}/{started}.json      what one pull did
 markets/_upcoming/{venue}/{league}/{started}.json   what one hourly pull did
+markets/_books/polymarket_us/{league}/{read_at}.json  every open game's book
 ```
 
 A day's file holds every game on that day the pull matched:
@@ -53,12 +55,16 @@ A day's file holds every game on that day the pull matched:
 Each price row is the end of an hour in epoch seconds, then what the side's
 contract cost in dollars on a $1 payout -- a probability that side wins.
 `price` is Kalshi's last trade in the hour or Polymarket's one quoted
-number; `bid` and `ask` are Kalshi's closing quotes and always null on
-Polymarket, which doesn't keep them. Rows run from the market's open to
+number; `bid` and `ask` are the closing quotes, kept by Kalshi and
+Polymarket US and always null on Polymarket. Polymarket US's rows are
+quotes only: `price` and `volume` are null. Rows run from the market's open to
 its close, so they include the game itself: cut them at `kickoff`.
 
 Kalshi prices each team in its own order book, so its two sides needn't
-sum to one. Polymarket's are one book, so they do.
+sum to one. Polymarket's are one book quoted at one number, so they do.
+Polymarket US's are one book too, but each side is what buying it costs --
+the ask, and one minus the bid -- so they sum to a little over one, the
+way Kalshi's asks do.
 
 `home` and `away` are ESPN's, never the venue's, so a neutral-site game
 is no different from any other.
@@ -114,12 +120,15 @@ kalshi ncaafb 2026-09-18..2026-09-21  pulled 20260926T211320Z
 
 What each has, as of September 2026:
 
-| league | Kalshi (`KX…GAME`) | Polymarket |
-|---|---|---|
-| nfl | 2025 preseason on | 2021 on; typed and with teams from 2025 |
-| ncaafb | 2025 on, FCS in its own series | late 2024 on; untyped until mid-2025 |
-| mens | 2025-26 on | March Madness 2025, then 2025-26 on |
-| womens | 2025-26 on | 2025-26 on, barely traded |
+| league | Kalshi (`KX…GAME`) | Polymarket | Polymarket US |
+|---|---|---|---|
+| nfl | 2025 preseason on | 2021 on; typed and with teams from 2025 | Nov 2025 on |
+| ncaafb | 2025 on, FCS in its own series | late 2024 on; untyped until mid-2025 | Dec 2025 bowls, then 2026 on |
+| mens | 2025-26 on | March Madness 2025, then 2025-26 on | Dec 2025 on |
+| womens | 2025-26 on | 2025-26 on, barely traded | March Madness 2026, then 2026-27 on |
+
+(Polymarket US's first months are from counting its listings in November
+2026; a backfill's summaries are the real answer.)
 
 NHL and WNBA are on both, and not pulled yet: call-it-what-you-want has no
 namespace for their ESPN ids to match to.
@@ -138,8 +147,29 @@ list their teams, home or away; older ones are untyped and recognized by
 shape, with their codes read off the slug. Each season is its own series.
 History is one price an hour, at most about two weeks per request, and
 Gamma's listings stop paging past an offset of about 2,000. Python's
-default user agent gets a 403. This is Polymarket's international venue;
-Polymarket US, where a US account trades, is a separate exchange.
+default user agent gets a 403. This is Polymarket's international venue,
+which a US account can't trade.
+
+**Polymarket US** (`gateway.polymarket.us`) is the CFTC-regulated exchange
+a US account trades on: separate books, separate prices. A game is an
+event (`cfb-dart-prnce-2026-11-07`) holding dozens of markets, one of them
+the moneyline (`marketType: "moneyline"`): a single yes/no instrument with
+the `long` team on yes and the other on no, so buying the short team is
+selling yes at the bid. Its price history is derived from the book, not
+trades -- each hour's best ask and one minus the best bid, which are the
+two sides' costs -- and one request returns a market's whole life, so a
+finished game backfills at any time. Size isn't in the history and the
+book is only ever now, so the hourly job snapshots every open game's book
+into `markets/_books/` (`gold-rush books`): each side's buyable levels,
+`[price, contracts]`, out to ten cents past the best. Those are keyed by
+the venue's event and not matched; a day file's `event` says which ESPN
+game it is. Events are filed under a series per league whose names don't
+track seasons (`cbb-2025` holds November 2026's games), so a listing asks
+every series seen plus the one the league endpoint calls active. Team
+codes are the international venue's and are looked up under its name in
+call-it-what-you-want. The public limit is 20 requests a second per IP; a
+pull paces itself at 12. Taker fees are tiered by 30-day volume, from
+0.095 × p × (1 − p) below $10,000 a month (see its fee schedule).
 
 ## On Batch
 
@@ -166,4 +196,4 @@ Tooling comes from the [mirrorball](https://github.com/NathanDeMaria/mirrorball)
 template; the image targets (`make build`, `make push`) are in `project.mk`.
 
 Tests live next to the code they cover, named `*_test.py`, and run against
-responses recorded from both venues in `gold_rush/testdata/`.
+responses recorded from each venue in `gold_rush/testdata/`.

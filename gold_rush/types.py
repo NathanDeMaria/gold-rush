@@ -18,6 +18,10 @@ so a `VenueGame`'s sides are in the venue's order and nothing more.
 
 from datetime import date, datetime
 from typing import NamedTuple
+from zoneinfo import ZoneInfo
+
+# Every venue files a game under its US Eastern date, and so does this.
+EASTERN = ZoneInfo("America/New_York")
 
 
 class Side(NamedTuple):

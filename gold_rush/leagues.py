@@ -35,12 +35,27 @@ class League(NamedTuple):
     # current series under, and every series id seen for it so far.
     polymarket_sport: str
     polymarket_series: tuple[int, ...]
+    # Polymarket US's slug for it, and every series id seen for it so far.
+    # Its league endpoint names the active one; series names don't track
+    # seasons (`cbb-2025` holds 2026-27 games), so all of them are asked.
+    polymarket_us_league: str
+    polymarket_us_series: tuple[int, ...]
 
 
 LEAGUES = {
     league.name: league
     for league in (
-        League("nfl", NFL, NFL, ENDGAME, ("KXNFLGAME",), "nfl", (1, 10187, 12185)),
+        League(
+            "nfl",
+            NFL,
+            NFL,
+            ENDGAME,
+            ("KXNFLGAME",),
+            "nfl",
+            (1, 10187, 12185),
+            "nfl",
+            (1, 2, 76),
+        ),
         League(
             "ncaafb",
             NCAAFB,
@@ -49,9 +64,31 @@ LEAGUES = {
             ("KXNCAAFGAME", "KXNCAAFCSGAME"),
             "cfb",
             (10002, 10210, 12756),
+            "cfb",
+            (5, 225),
         ),
-        League("mens", NCAAMBB, NCAA, ESPN, ("KXNCAAMBGAME",), "cbb", (10050, 10470)),
-        League("womens", NCAAWBB, NCAA, ESPN, ("KXNCAAWBGAME",), "cwbb", (10471,)),
+        League(
+            "mens",
+            NCAAMBB,
+            NCAA,
+            ESPN,
+            ("KXNCAAMBGAME",),
+            "cbb",
+            (10050, 10470),
+            "cbb",
+            (7,),
+        ),
+        League(
+            "womens",
+            NCAAWBB,
+            NCAA,
+            ESPN,
+            ("KXNCAAWBGAME",),
+            "cwbb",
+            (10471,),
+            "wcbb",
+            (21,),
+        ),
     )
 }
 

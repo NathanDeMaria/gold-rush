@@ -4,6 +4,7 @@ Where a pull's output goes, and the one layout it's written in.
     markets/{venue}/{league}/{YYYY-MM-DD}.json
     markets/_pulls/{venue}/{league}/{YYYYMMDDTHHMMSSZ}.json
     markets/_upcoming/{venue}/{league}/{YYYYMMDDTHHMMSSZ}.json
+    markets/_books/{venue}/{league}/{YYYYMMDDTHHMMSSZ}.json
 
 The first is the prices: one file per venue, league and ESPN game day
 (US Eastern), holding every game any pull matched to that day. A re-pull
@@ -16,7 +17,10 @@ meant to be read: what was listed, what matched, what didn't and why,
 without opening a container's stdout. The third is the same, for the
 hourly pulls of games that haven't been played yet (`pull.upcoming`): kept
 apart because there are two dozen of them a day per venue and league, and
-`gold-rush report` is for reading the daily ones.
+`gold-rush report` is for reading the daily ones. The fourth is a snapshot
+of every open game's order book, for a venue whose history has no size in
+it (`pull.snapshot_books`): keyed by the venue's event, not yet matched to
+an ESPN game -- the day files say which game an event is.
 
 A store is a local directory or a bucket. Local is for trying things; the
 scheduled pull writes to the bucket endgame's seasons and odds live in.
@@ -36,10 +40,15 @@ from endgame_aws.io import (
 PREFIX = "markets"
 PULLS = f"{PREFIX}/_pulls"
 UPCOMING = f"{PREFIX}/_upcoming"
+BOOKS = f"{PREFIX}/_books"
 
 
 def day_key(venue: str, league: str, day: str) -> str:
     return f"{PREFIX}/{venue}/{league}/{day}.json"
+
+
+def book_key(venue: str, league: str, read_at: str) -> str:
+    return f"{BOOKS}/{venue}/{league}/{read_at}.json"
 
 
 def pull_key(venue: str, league: str, started_at: str, under: str = PULLS) -> str:

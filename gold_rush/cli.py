@@ -5,6 +5,7 @@ gold-rush's command line.
     gold-rush pull kalshi nfl                            # yesterday, to the bucket
     gold-rush pull polymarket mens 2025-11-03 2026-04-07 # a season's backfill
     gold-rush upcoming                                   # today and tomorrow, all of it
+    gold-rush books                                      # Polymarket US's open books
     gold-rush report                                     # what recent pulls did
 
 `pull` and `report` default to the bucket endgame's seasons live in, read
@@ -20,10 +21,10 @@ from datetime import date, datetime, timedelta
 from .http import Http
 from .leagues import LEAGUES
 from .leagues import league as league_named
-from .match import EASTERN
-from .pull import VENUES, pull, read_games, upcoming
+from .pull import VENUES, pull, read_games, snapshot_books, upcoming
 from .store import PULLS, UPCOMING, open_store
 from .summary import PullSummary, render
+from .types import EASTERN
 
 
 class Cli:
@@ -79,7 +80,8 @@ class Cli:
         games_from: str | None = None,
     ) -> None:
         """
-        Pull every venue and league for today and the `days - 1` after it.
+        Pull every venue and league for today and the `days - 1` after it,
+        then snapshot Polymarket US's books (`books`).
 
         The hourly job: prices on the games that haven't been played, so a
         page can show the market before a game rather than the morning after
@@ -97,7 +99,32 @@ class Cli:
         )
         for summary in summaries:
             print(render(summary, misses=3))
+        written, book_failures = asyncio.run(snapshot_books(LEAGUES, store=store))
+        failures += book_failures
+        print(f"{len(written)} book snapshots", file=sys.stderr)
         print(f"wrote to {store.describe()}", file=sys.stderr)
+        if failures:
+            print("\n".join(["failed:", *failures]), file=sys.stderr)
+            raise SystemExit(1)
+
+    def books(self, *leagues: str, out: str | None = None) -> None:
+        """
+        Snapshot Polymarket US's order book on every open game.
+
+            gold-rush books                  # every league
+            gold-rush books ncaafb --out /tmp/books
+
+        Its price history has no size in it, and a book can't be read after
+        the fact, so the hourly job runs this after `upcoming`.
+        """
+        for name in leagues:
+            league_named(name)
+        store = open_store(out or _bucket())
+        written, failures = asyncio.run(
+            snapshot_books(leagues or tuple(LEAGUES), store=store)
+        )
+        for key in written:
+            print(key)
         if failures:
             print("\n".join(["failed:", *failures]), file=sys.stderr)
             raise SystemExit(1)

@@ -1,0 +1,446 @@
+{
+ "id": "186899",
+ "ticker": "cfb-dart-prnce-2026-11-07",
+ "slug": "cfb-dart-prnce-2026-11-07",
+ "title": "Dartmouth vs. Princeton",
+ "startDate": "2026-11-07T17:00:00Z",
+ "endDate": "2026-11-08T04:59:00Z",
+ "active": true,
+ "closed": true,
+ "archived": false,
+ "category": "sports",
+ "createdAt": "2026-10-24T17:30:10Z",
+ "updatedAt": "2026-11-08T20:54:53Z",
+ "startTime": "2026-11-07T17:00:00Z",
+ "seriesSlug": "cfb-2026",
+ "score": "14-21",
+ "elapsed": "",
+ "period": "FT",
+ "live": false,
+ "ended": true,
+ "finishedTimestamp": "2026-11-07T19:56:48Z",
+ "markets": [
+  {
+   "id": "1760637",
+   "question": "Who will win in the upcoming football event Dartmouth vs Princeton scheduled for November 7, 2026 at 5:00 PM UTC?",
+   "slug": "aec-cfb-dart-prnce-2026-11-07",
+   "endDate": "2026-11-07T20:57:26Z",
+   "category": "sports",
+   "startDate": "2026-10-24T17:30:10Z",
+   "active": true,
+   "marketType": "moneyline",
+   "closed": true,
+   "createdAt": "2026-10-24T17:30:10Z",
+   "updatedAt": "2026-11-08T20:54:53Z",
+   "archived": false,
+   "orderPriceMinTickSize": 0.005,
+   "gameStartTime": "2026-11-07T17:00:00Z",
+   "manualActivation": false,
+   "sportsMarketType": "football_team_full_game_winner",
+   "marketSides": [
+    {
+     "id": "3520742",
+     "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+     "identifier": "aec-cfb-dart-prnce-2026-11-07",
+     "createdAt": "2026-10-24T17:30:10Z",
+     "updatedAt": "2026-10-24T17:30:10Z",
+     "price": "0",
+     "marketId": 1760637,
+     "long": true,
+     "teamId": 31872,
+     "team": {
+      "id": 31872,
+      "name": "Dartmouth",
+      "abbreviation": "dart",
+      "league": "cfb",
+      "record": "4-4",
+      "alias": "Big Green",
+      "safeName": "Dartmouth",
+      "ordering": "away",
+      "displayAbbreviation": "DART",
+      "ranking": "0",
+      "imageDisplayType": "IMAGE_DISPLAY_TYPE_LOGO"
+     },
+     "tradable": true
+    },
+    {
+     "id": "3520743",
+     "marketSideType": "MARKET_SIDE_TYPE_INSTRUMENT",
+     "identifier": "aec-cfb-dart-prnce-2026-11-07",
+     "createdAt": "2026-10-24T17:30:10Z",
+     "updatedAt": "2026-10-24T17:30:10Z",
+     "price": "1",
+     "marketId": 1760637,
+     "long": false,
+     "teamId": 1174,
+     "team": {
+      "id": 1174,
+      "name": "Princeton",
+      "abbreviation": "prnce",
+      "league": "cfb",
+      "record": "6-2",
+      "alias": "Tigers",
+      "safeName": "Princeton",
+      "providerId": 160,
+      "ordering": "home",
+      "displayAbbreviation": "PRIN",
+      "ranking": "0",
+      "imageDisplayType": "IMAGE_DISPLAY_TYPE_LOGO"
+     },
+     "tradable": true
+    }
+   ],
+   "outcomes": "[\"Big Green\",\"Tigers\"]",
+   "outcomePrices": "[\"0\",\"1\"]",
+   "ep3Status": "EXPIRED",
+   "status": "MARKET_STATUS_RESOLVED",
+   "assetPriceTerms": null,
+   "sportsMarketTypeV2": "SPORTS_MARKET_TYPE_MONEYLINE",
+   "hidden": false,
+   "title": "Dartmouth vs Princeton",
+   "feeCoefficient": 0.095,
+   "titleShort": "DART vs PRIN",
+   "ep3SyncedAt": "2026-11-07T20:57:26Z",
+   "minimumTradeQty": 0.01,
+   "comboEnabled": true,
+   "politics": null,
+   "eventSubcategory": "FOOTBALL"
+  }
+ ],
+ "sportradarGameId": "812d4070-2e50-4035-a892-2d4ba960f5c4",
+ "eventState": {
+  "id": 142231930,
+  "sportradarGameId": "812d4070-2e50-4035-a892-2d4ba960f5c4",
+  "type": "football",
+  "createdAt": "2026-11-07T16:30:03.182839Z",
+  "updatedAt": "2026-11-07T19:56:48.333630Z",
+  "score": "14-21",
+  "elapsed": "",
+  "period": "FT",
+  "live": false,
+  "ended": true,
+  "finishedTimestamp": "2026-11-07T19:56:48.328692Z",
+  "footballState": {
+   "driveState": null,
+   "timeouts": [
+    {
+     "teamId": "1174",
+     "used": 0,
+     "remaining": 3
+    },
+    {
+     "teamId": "31872",
+     "used": 0,
+     "remaining": 3
+    }
+   ]
+  },
+  "marketGroupStats": [],
+  "periodScores": [
+   {
+    "number": 1,
+    "type": "PERIOD_SCORE_TYPE_REGULATION",
+    "label": "Q1",
+    "scores": [
+     {
+      "competitorId": "1174",
+      "score": 14
+     },
+     {
+      "competitorId": "31872",
+      "score": 0
+     }
+    ]
+   },
+   {
+    "number": 2,
+    "type": "PERIOD_SCORE_TYPE_REGULATION",
+    "label": "Q2",
+    "scores": [
+     {
+      "competitorId": "1174",
+      "score": 7
+     },
+     {
+      "competitorId": "31872",
+      "score": 7
+     }
+    ]
+   },
+   {
+    "number": 3,
+    "type": "PERIOD_SCORE_TYPE_REGULATION",
+    "label": "Q3",
+    "scores": [
+     {
+      "competitorId": "1174",
+      "score": 0
+     },
+     {
+      "competitorId": "31872",
+      "score": 0
+     }
+    ]
+   },
+   {
+    "number": 4,
+    "type": "PERIOD_SCORE_TYPE_REGULATION",
+    "label": "Q4",
+    "scores": [
+     {
+      "competitorId": "1174",
+      "score": 0
+     },
+     {
+      "competitorId": "31872",
+      "score": 7
+     }
+    ]
+   }
+  ],
+  "eventId": 186899
+ },
+ "participants": [],
+ "hidden": false,
+ "teams": [
+  {
+   "id": 31872,
+   "name": "Dartmouth",
+   "abbreviation": "dart",
+   "league": "cfb",
+   "record": "4-4",
+   "alias": "Big Green",
+   "safeName": "Dartmouth",
+   "displayAbbreviation": "DART",
+   "ranking": "0",
+   "imageDisplayType": "IMAGE_DISPLAY_TYPE_LOGO"
+  },
+  {
+   "id": 1174,
+   "name": "Princeton",
+   "abbreviation": "prnce",
+   "league": "cfb",
+   "record": "6-2",
+   "alias": "Tigers",
+   "safeName": "Princeton",
+   "providerId": 160,
+   "displayAbbreviation": "PRIN",
+   "ranking": "0",
+   "imageDisplayType": "IMAGE_DISPLAY_TYPE_LOGO"
+  }
+ ],
+ "metadata": {
+  "politics": null,
+  "gameState": {
+   "id": 142231930,
+   "sportradarGameId": "812d4070-2e50-4035-a892-2d4ba960f5c4",
+   "type": "football",
+   "createdAt": "2026-11-07T16:30:03.182839Z",
+   "updatedAt": "2026-11-07T19:56:48.333630Z",
+   "score": "14-21",
+   "elapsed": "",
+   "period": "FT",
+   "live": false,
+   "ended": true,
+   "finishedTimestamp": "2026-11-07T19:56:48.328692Z",
+   "footballState": {
+    "driveState": null,
+    "timeouts": [
+     {
+      "teamId": "1174",
+      "used": 0,
+      "remaining": 3
+     },
+     {
+      "teamId": "31872",
+      "used": 0,
+      "remaining": 3
+     }
+    ]
+   },
+   "marketGroupStats": [],
+   "periodScores": [
+    {
+     "number": 1,
+     "type": "PERIOD_SCORE_TYPE_REGULATION",
+     "label": "Q1",
+     "scores": [
+      {
+       "competitorId": "1174",
+       "score": 14
+      },
+      {
+       "competitorId": "31872",
+       "score": 0
+      }
+     ]
+    },
+    {
+     "number": 2,
+     "type": "PERIOD_SCORE_TYPE_REGULATION",
+     "label": "Q2",
+     "scores": [
+      {
+       "competitorId": "1174",
+       "score": 7
+      },
+      {
+       "competitorId": "31872",
+       "score": 7
+      }
+     ]
+    },
+    {
+     "number": 3,
+     "type": "PERIOD_SCORE_TYPE_REGULATION",
+     "label": "Q3",
+     "scores": [
+      {
+       "competitorId": "1174",
+       "score": 0
+      },
+      {
+       "competitorId": "31872",
+       "score": 0
+      }
+     ]
+    },
+    {
+     "number": 4,
+     "type": "PERIOD_SCORE_TYPE_REGULATION",
+     "label": "Q4",
+     "scores": [
+      {
+       "competitorId": "1174",
+       "score": 0
+      },
+      {
+       "competitorId": "31872",
+       "score": 7
+      }
+     ]
+    }
+   ],
+   "eventId": 0
+  }
+ },
+ "sortType": "price",
+ "primaryTag": {
+  "id": "6",
+  "label": "CFB",
+  "slug": "cfb",
+  "createdAt": "2025-10-21T18:23:05Z",
+  "updatedAt": "2026-11-09T23:39:02Z",
+  "league": {
+   "id": 7,
+   "name": "CFB",
+   "sportId": 3,
+   "tagId": 6,
+   "resolution": "https://www.ncaa.com/",
+   "ordering": "away",
+   "activeSeriesId": 225,
+   "isOperational": true,
+   "automaticResolution": false,
+   "createdAt": "2026-03-05T18:30:42Z",
+   "slug": "cfb",
+   "abbreviation": "CFB"
+  },
+  "subtags": [
+   {
+    "id": "1100",
+    "label": "FBS",
+    "slug": "fbs",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   },
+   {
+    "id": "1139",
+    "label": "FCS",
+    "slug": "fcs",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   },
+   {
+    "id": "1186",
+    "label": "Top 25",
+    "slug": "top-25",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   },
+   {
+    "id": "901",
+    "label": "SEC",
+    "slug": "sec",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "tradable": false,
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   },
+   {
+    "id": "902",
+    "label": "Big Ten",
+    "slug": "big-ten",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "tradable": false,
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   },
+   {
+    "id": "903",
+    "label": "Big 12",
+    "slug": "big-12",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "tradable": false,
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   },
+   {
+    "id": "905",
+    "label": "ACC",
+    "slug": "acc",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "tradable": false,
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   },
+   {
+    "id": "904",
+    "label": "Pac-12",
+    "slug": "pac-12",
+    "updatedAt": "2026-11-09T23:39:02Z",
+    "tradable": false,
+    "parentId": 6,
+    "subtags": [],
+    "hub": null,
+    "featuredEventIds": []
+   }
+  ],
+  "hub": null,
+  "featuredEventIds": []
+ },
+ "streamProvider": "",
+ "streamRequiresAuth": false,
+ "marketCounts": {
+  "numMarkets": 0,
+  "numSpreadsAndTotalsMarkets": 0
+ },
+ "fixtureId": "",
+ "payoutEstimateTime": ""
+}
